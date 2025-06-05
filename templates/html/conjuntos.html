@@ -7,9 +7,29 @@
 </head>
 
 <body>
-	<div class="card">
-		Contagem 1
-		<button type="button">+</button>
-	</div>
+	  <div id="cards-container">
+    <div class="card">
+      Contagem 1
+      <button id="nova_contagem" type="button">+</button>
+    </div>
+  </div>
+
+  <script>
+    let contagemAtual = 1;
+
+    const nova_contagem = document.getElementById("nova_contagem");
+    const container = document.getElementById("cards-container");
+
+    nova_contagem.addEventListener("click", () => 
+	{
+      contagemAtual++;
+      const novoCard = document.createElement("div");
+      novoCard.classList.add("card");
+      novoCard.textContent = `Contagem ${contagemAtual}`;
+
+      container.appendChild(novoCard);
+    });
+  </script>
+
 </body>
 </html>

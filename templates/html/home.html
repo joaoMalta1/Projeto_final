@@ -1,14 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Home Page</title>
+  <meta charset="UTF-8">
+  <title>Conjuntos Dinâmicos</title>
+  <style>
+    .card {
+      border: 2px solid #0a52b1;
+      padding: 1rem;
+      margin-top: 1rem;
+      width: 200px;
+    }
+
+    input[type="text"] {
+      padding: 0.4rem;
+      font-size: 1rem;
+    }
+
+  </style>
 </head>
 <body>
-    <h2>escolha o nome do conjunto: </h2>
-    <form action="/action_page.php">
-        <label for="fname">First name:</label>
-        <input type="text" id="fname" name="fname"><br><br></body>
-        <input type="submit" value="OK">
-    </form>
 
+  <h2>Escolha o nome do conjunto:</h2>
+  
+  <form id="nome_contagem">
+    <label for="fname">Nome:</label>
+    <input type="text" id="titulo" name="titulo" required>
+    <input type="submit" value="OK">
+  </form>
+
+  <div id="cards-container">
+
+  </div>
+
+  <script>
+    //document faz referencia ao html da pagina
+    const form = document.getElementById("nome_contagem");
+    const input = document.getElementById("titulo");
+    const container = document.getElementById("cards-container");
+
+    form.addEventListener("submit", async (event) => 
+    {
+      event.preventDefault();
+      const nome = input.value.trim();
+      if (nome === "")
+      { 
+        return;
+      }
+      
+      // Envia para o Flask via fetch
+      const resposta = await fetch("/registra_conjunto", //await pra esperar a resposta da requisicao
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ titulo: nome }) //transforma os dados do js em dados json
+      });
+
+      const resultado = await resposta.json();
+      if (resultado.status === "ok") 
+      {
+        const novoCard = document.createElement("div");
+        novoCard.classList.add("card");
+        novoCard.textContent = nome;
+        container.appendChild(novoCard);
+        input.value = "";
+        alert(resultado.mensagem);
+      } 
+      else 
+      {
+        alert(resultado.mensagem);
+      }
+    });
+  </script>
+</body>
 </html>
