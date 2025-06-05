@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Contagem de Produtos</title>
+  <style>
+ 
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="titulo">Escolha a quantidade de produtos:</div>
+    <div class="conteudo">
+      <div class="contagens">
+        {% for conjunto in conjuntos %}
+          <button class="contagem-btn">{{ conjunto[0] }}</button>
+        {% endfor %}
+      </div>
+      <div class="formulario">
+        <label>Nome: <input type="text" name="nome"></label>
+        <label>Passo: <input type="number" name="passo"></label>
+        <label>Unidade: <input type="text" name="unidade"></label>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
