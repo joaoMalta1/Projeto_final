@@ -3,20 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Conjuntos Dinâmicos</title>
-  <style>
-    .card {
-      border: 2px solid #0a52b1;
-      padding: 1rem;
-      margin-top: 1rem;
-      width: 200px;
-    }
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 
-    input[type="text"] {
-      padding: 0.4rem;
-      font-size: 1rem;
-    }
-
-  </style>
 </head>
 <body>
 
@@ -63,6 +51,12 @@
         const novoCard = document.createElement("div");
         novoCard.classList.add("card");
         novoCard.textContent = nome;
+        novoCard.addEventListener("click", () => 
+        {
+        console.log("Card clicado:", nome);
+        alert(`Você clicou no card: ${nome}`);
+        });
+
         container.appendChild(novoCard);
         input.value = "";
         alert(resultado.mensagem);

@@ -1,0 +1,23 @@
+.card {
+	border: 2px solid #0a52b1;
+	padding: 1rem;
+	margin-top: 1rem;
+	width: 200px;
+	cursor: pointer;
+	
+}
+
+.card:hover{
+background-color: rgb(118, 118, 201);
+color: white;
+}
+
+.card:active{
+background-color: #0a52b1;
+}
+
+input[type="text"] 
+{
+	padding: 0.4rem;
+	font-size: 1rem;
+}
