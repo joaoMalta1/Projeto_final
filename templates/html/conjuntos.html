@@ -14,22 +14,43 @@
     </div>
   </div>
 
-  <script>
-    let contagemAtual = 1;
+ <script>
+  let contagemAtual = 1;
+  const limite = 4;
 
-    const nova_contagem = document.getElementById("nova_contagem");
-    const container = document.getElementById("cards-container");
+  // Extrai o título do conjunto da URL (essa parte eu nao conhecia )
+  const pathParts = window.location.pathname.split("/");
+  const tituloConjunto = pathParts[pathParts.length - 1];
+ //
 
-    nova_contagem.addEventListener("click", () => 
-	{
+  const nova_contagem = document.getElementById("nova_contagem");
+  const container = document.getElementById("cards-container");
+
+  nova_contagem.addEventListener("click", () => 
+  {
+    if (contagemAtual < limite) 
+    {
       contagemAtual++;
       const novoCard = document.createElement("div");
       novoCard.classList.add("card");
       novoCard.textContent = `Contagem ${contagemAtual}`;
-
       container.appendChild(novoCard);
-    });
-  </script>
+
+      fetch(`/adiciona_contagem/${tituloConjunto}`, 
+      {
+        method: "POST"
+      })
+      .then(response => response.json())
+      .then(data => console.log("backend:", data))
+      .catch(error => console.error("erro ao registrar:", error));
+    } 
+    else 
+    {
+      alert("limite de contagens atingido.");
+    }
+  });
+</script>
+
 
 </body>
 </html>

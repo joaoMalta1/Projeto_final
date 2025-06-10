@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Erro</title>
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .erro-container {
+      text-align: center;
+      background-color: #fff;
+      padding: 2rem 3rem;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .erro-codigo {
+      font-size: 4rem;
+      color: #dc3545;
+      margin-bottom: 0.5rem;
+    }
+
+    .erro-mensagem {
+      font-size: 1.2rem;
+      color: #343a40;
+      margin-bottom: 1rem;
+    }
+
+    .botao-voltar {
+      padding: 0.6rem 1.2rem;
+      background-color: #0d6efd;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .botao-voltar:hover {
+      background-color: #0b5ed7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="erro-container">
+    <div class="erro-codigo">{{erro}}</div>
+    <a href="/" class="botao-voltar">Voltar para o início</a>
+  </div>
+
+</body>
+</html>
