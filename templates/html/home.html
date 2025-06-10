@@ -54,9 +54,8 @@
         novoCard.addEventListener("click", () => 
         {
         console.log("Card clicado:", nome);
-        alert(`Você clicou no card: ${nome}`);
+        window.location.href = `/conjuntos/${encodeURIComponent(nome)}`; //redirect pra outra url que recebe o nome do card como parametro
         });
-
         container.appendChild(novoCard);
         input.value = "";
         alert(resultado.mensagem);
