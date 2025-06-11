@@ -1,4 +1,4 @@
-from flask import Flask,  render_template, request, redirect, jsonify
+from flask import Flask,  render_template, request, jsonify
 
 app = Flask(__name__)
 
@@ -13,7 +13,7 @@ def registra_conjunto():
     data = request.get_json()
     novo_conjunto = data.get("titulo")
     if novo_conjunto:
-        contagens = [0]
+        contagens = []
         conjuntos_teste.append([novo_conjunto, contagens])
         print(conjuntos_teste)
         return jsonify({"status": "ok", "mensagem": "vonjunto registrado"}) ,200
