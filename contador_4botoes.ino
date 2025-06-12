@@ -1,0 +1,205 @@
+#include <Adafruit_GFX.h>
+#include <MCUFRIEND_kbv.h>
+#include <GFButton.h>
+
+MCUFRIEND_kbv tela;
+int qtd[4] = {0, 99, 999, 1000};
+String contagem = "Setor";
+int altura = 50;
+unsigned long instanteAnteriorDeDeteccao = 0;
+bool posicaoAnterior; 
+bool posicao;
+unsigned long temposPressionados[4] = {0, 0, 0, 0};
+int space[4] = {0, 0, 0, 0};
+String unidades[4] = {"g", "M", "L", "mm"};
+
+GFButton btn1(A8);
+GFButton btn2(A9);
+GFButton btn3(A10);
+GFButton btn4(A11);
+
+void setup() {
+
+  Serial.begin(9600);
+  tela.begin(tela.readID());
+  tela.fillScreen(TFT_BLACK);
+
+  mostrarPrimeiraColuna();
+   
+  mostrarSegundaColuna();
+
+  btn1.setPressHandler(verificaPressionado);
+  btn2.setPressHandler(verificaPressionado);
+  btn3.setPressHandler(verificaPressionado);
+  btn4.setPressHandler(verificaPressionado);
+
+  btn1.setReleaseHandler(aumentaOuDiminui);
+  btn2.setReleaseHandler(aumentaOuDiminui);
+  btn3.setReleaseHandler(aumentaOuDiminui);
+  btn4.setReleaseHandler(aumentaOuDiminui);
+
+}
+
+
+void loop () {
+
+  btn1.process();
+	btn2.process();
+	btn3.process();
+	btn4.process();
+
+}
+
+
+
+void verificaPressionado(GFButton& botao) {
+  int i;
+  if (&botao == &btn1) 
+	  i = 0;
+  else if (&botao == &btn2) 
+	  i = 1;
+  else if (&botao == &btn3) 
+	  i = 2;
+  else if (&botao == &btn4) 
+	  i = 3;
+
+
+  temposPressionados[i] = millis();
+
+}
+
+
+void aumentaOuDiminui(GFButton& botao){
+  int indice;
+  if (&botao == &btn1) 
+	  indice = 0;
+  else if (&botao == &btn2) 
+	  indice = 1;
+  else if (&botao == &btn3) 
+	  indice = 2;
+  else if (&botao == &btn4) 
+	  indice = 3;
+
+
+  if ( millis() - temposPressionados[indice] > 1000) {
+    if (qtd[indice] > 0) {
+      diminuirContagem(botao, indice);
+    } else {
+      qtd[indice] = 0;
+    }
+  }
+  else if (millis() - temposPressionados[indice] < 1000){
+    aumentarContagem(botao, indice);
+  }
+
+
+}
+void aumentarContagem(GFButton& botao, int indice) {
+  qtd[indice]++;
+  atualizaTela(indice);
+}
+void diminuirContagem(GFButton& botao, int indice) {
+  qtd[indice]--;
+  atualizaTela(indice);
+}
+
+void mostrarPrimeiraColuna(){
+	tela.setTextColor(TFT_WHITE);
+  tela.setTextSize(3);
+  tela.setCursor(15, 30);
+  tela.print(contagem);
+
+  for (int i = 0; i < 4; i++) {
+    int y = 80 + i * altura ;
+
+    tela.setCursor(15, y + i*5 + 15);
+
+    escolheCor(i);
+
+    tela.setTextSize(2);
+    tela.print(contagem + " " + String(i + 1));
+  }
+}
+
+void mostrarSegundaColuna() {
+	tela.setTextColor(TFT_WHITE);
+  tela.setTextSize(3);
+  tela.setCursor(160, 30);
+  tela.print("QTD");
+  
+
+	for (int i = 0; i < 4; i++) {
+    int y = 90 + i * altura;
+    if(qtd[i] < 10){
+      space[i] = 55;
+    }
+    else if(qtd[i] >= 10 && qtd[i] < 100){
+      space[i] = 38;
+    }
+    else if(qtd[i] >= 100 && qtd[i] < 1000){
+      space[i] = 19;
+    }
+    else if(qtd[i] >= 1000 && qtd[i] < 9999){
+      space[i] = 1;
+    }
+    
+    Serial.println(String(unidades[i].length()));
+    space[i] -= (unidades[i].length()*18); //largura da letra é 6 pixels no tamanho 3 = 18
+    tela.setCursor(150 + space[i], y + i *6);  
+    
+    escolheCor(i);
+
+    tela.setTextSize(3);
+    tela.print(String(qtd[i])+unidades[i]);
+    
+  }
+}
+
+void atualizaTela(int i){
+  int y = 90 + i * altura;
+  if(qtd[i] < 10){
+    space[i] = 55;
+  }
+  else if(qtd[i] >= 10 && qtd[i] < 100){
+    space[i] = 38;
+  }
+  else if(qtd[i] >= 100 && qtd[i] < 1000){
+    space[i] = 19;
+  }
+  else if(qtd[i] >= 1000 && qtd[i] < 9999){
+    space[i] = 1;
+  }
+  
+  tela.fillRect(110, y+ i *6, 120, 35, TFT_BLACK);
+  space[i] -= (unidades[i].length()*18);
+  tela.setCursor(150 + space[i], y + i *6);  
+  
+  escolheCor(i);
+  tela.print(String(qtd[i])+unidades[i]);
+
+  tela.setTextSize(3);
+  
+
+}
+
+void escolheCor(int i){
+  if (i == 0){
+    tela.setTextColor(TFT_BLUE);
+  }
+  else if (i == 1){
+    tela.setTextColor(TFT_RED);
+  }
+  else if (i == 2){
+    tela.setTextColor(TFT_GREEN);
+  }
+  else if (i == 3){
+    tela.setTextColor(TFT_YELLOW);
+  }
+
+}
+
+
+
+
+
+
