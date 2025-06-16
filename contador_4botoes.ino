@@ -269,8 +269,8 @@ void carregarDadosDaEEPROM() {
 void esperarDadosSerial() {
 /*
 QTD:10,20,30,40
-Exemplo: NOME:SetorA
-Exemplo: UNI:g,L,mm,kg
+NOME:SetorA
+UNI:g,L,mm,kg
 */
 
   if (Serial.available() > 0) {
