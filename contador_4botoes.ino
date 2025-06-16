@@ -1,6 +1,8 @@
 #include <Adafruit_GFX.h>
 #include <MCUFRIEND_kbv.h>
 #include <GFButton.h>
+#include <EEPROM.h>
+
 
 MCUFRIEND_kbv tela;
 int qtd[4] = {0, 99, 999, 1000};
@@ -13,6 +15,10 @@ unsigned long temposPressionados[4] = {0, 0, 0, 0};
 int space[4] = {0, 0, 0, 0};
 String unidades[4] = {"g", "M", "L", "mm"};
 
+int enderecoQtd = 0; //8 bytes -> de 0 a 7
+int enderecoContagem = enderecoQtd + 8; // 1 + 20 (max de caracteres) ->8 a 28
+int enderecoUnidades = enderecoContagem + 21; //4 unidades de ate 5 letras = 24 bytes -> 29 a 52
+
 GFButton btn1(A8);
 GFButton btn2(A9);
 GFButton btn3(A10);
@@ -21,6 +27,9 @@ GFButton btn4(A11);
 void setup() {
 
   Serial.begin(9600);
+  carregarDadosDaEEPROM();
+  // esperarDadosSerial();
+
   tela.begin(tela.readID());
   tela.fillScreen(TFT_BLACK);
 
@@ -44,9 +53,11 @@ void setup() {
 void loop () {
 
   btn1.process();
-	btn2.process();
-	btn3.process();
-	btn4.process();
+  btn2.process();
+  btn3.process();
+  btn4.process();
+
+// esperarDadosSerial();
 
 }
 
@@ -94,13 +105,17 @@ void aumentaOuDiminui(GFButton& botao){
 
 
 }
+//DUVIDA: será que colocar para salvar a cada vez que diminuir ou amentar a contagem nao irá deixar lento o processo?
+//Talvez possa ter um timer para ver quando a pessoa parou de mexer ou colocar um quinto botao para quando a pessoa pressionar os dados sejam salvos
 void aumentarContagem(GFButton& botao, int indice) {
   qtd[indice]++;
   atualizaTela(indice);
+  salvarDadosNaEEPROM();
 }
 void diminuirContagem(GFButton& botao, int indice) {
   qtd[indice]--;
   atualizaTela(indice);
+  salvarDadosNaEEPROM();
 }
 
 void mostrarPrimeiraColuna(){
@@ -195,6 +210,110 @@ void escolheCor(int i){
   else if (i == 3){
     tela.setTextColor(TFT_YELLOW);
   }
+
+}
+
+void salvarDadosNaEEPROM() {
+  // Salvar qtd[4]
+  for (int i = 0; i < 4; i++) {
+    EEPROM.put(enderecoQtd + i * sizeof(int), qtd[i]);
+  }
+
+  // Salvar contagem 
+  byte tamanhoContagem = contagem.length(); //cada letra ocupa um byte
+  EEPROM.put(enderecoContagem, tamanhoContagem);
+  for (int i = 0; i < tamanhoContagem; i++) {
+    EEPROM.put(enderecoContagem + 1 + i, contagem[i]);
+  }
+
+  // Salvar unidades[4] 
+  int enderecoAtual = enderecoUnidades;
+  for (int i = 0; i < 4; i++) {
+    byte tam = unidades[i].length(); //tamanho da stirng de unidade 
+    EEPROM.put(enderecoAtual++, tam); //salva o tamanho e move para o proximo endereco
+    for (int j = 0; j < tam; j++) { //salva letra por letra
+      EEPROM.put(enderecoAtual++, unidades[i][j]);
+    }
+  }
+}
+
+void carregarDadosDaEEPROM() {
+  // Carregar qtd[4]
+  for (int i = 0; i < 4; i++) {
+    EEPROM.get(enderecoQtd + i * sizeof(int), qtd[i]);
+  }
+
+  byte tamanhoContagem; //cada letra ocupa um byte
+  EEPROM.get(enderecoContagem, tamanhoContagem); //pega tamanho da string
+  contagem = ""; //garante que a string contagem esta vazia 
+  for (int i = 0; i < tamanhoContagem; i++) {
+    char c;
+    EEPROM.get(enderecoContagem + 1 + i, c);
+    contagem += c;
+  }
+
+  // Carregar unidades[4]
+  int enderecoAtual = enderecoUnidades;
+  for (int i = 0; i < 4; i++) {
+    byte tam; //tamanho da stirng de unidade 
+    EEPROM.get(enderecoAtual++, tam); //pega o tamanho da string
+    unidades[i] = ""; //garante que a string esta vazia 
+    for (int j = 0; j < tam; j++) {
+      char c;
+      EEPROM.get(enderecoAtual++, c);
+      unidades[i] += c;
+    }
+  }
+}
+
+void esperarDadosSerial() {
+/*
+QTD:10,20,30,40
+Exemplo: NOME:SetorA
+Exemplo: UNI:g,L,mm,kg
+*/
+
+  if (Serial.available() > 0) {
+    String texto = Serial.readStringUntil('\n');
+    texto.trim();
+
+    if (texto.startsWith("QTD:")) {
+      texto.remove(0, 4); // remove "QTD:"
+      int i = 0;
+      while (texto.length() > 0 && i < 4) {
+        int pos_virgula = texto.indexOf(',');
+        if (pos_virgula == -1){ //se não tiver virgula o resto da string sera o tamanho 
+          pos_virgula = texto.length();
+        } 
+        qtd[i] = texto.substring(0, pos_virgula).toInt();
+        texto.remove(0, pos_virgula + 1); //remove a parte usada e a virgula
+        i++;
+      }
+      Serial.println("QTD recebida!");
+    }
+
+    else if (texto.startsWith("NOME:")) {
+      texto.remove(0, 5); // remove "NOME:"
+      contagem = texto;
+      Serial.println("Nome recebido!");
+    }
+
+    else if (texto.startsWith("UNI:")) {
+    texto.remove(0, 4); // remove "UNI:"
+    int i = 0;
+    while (texto.length() > 0 && i < 4) {
+      int pos_virgula = texto.indexOf(',');
+      if (pos_virgula == -1) { //se não tiver virgula o resto da string sera o tamanho -> ultimo valor digiado 
+        pos_virgula = texto.length();
+      }
+      unidades[i] = texto.substring(0, pos_virgula); //pega string ate a posicao da virgula
+      texto.remove(0, pos_virgula + 1); //remove a string usada e a virgula 
+      i++;
+    }
+    Serial.println("Unidades recebidas!");
+  }
+
+  salvarDadosNaEEPROM()
 
 }
 
