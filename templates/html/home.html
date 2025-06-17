@@ -16,9 +16,13 @@
     <input type="submit" value="OK">
   </form>
 
-  <div id="cards-container">
-
-  </div>
+<div id="cards-container">
+  {% for conjunto in conjuntos %}
+    <div class="card" onclick="window.location.href='/conjuntos/{{ conjunto.titulo | urlencode }}'">
+      {{ conjunto.titulo }}
+    </div>
+  {% endfor %}
+</div>
 
   <script>
     //document faz referencia ao html da pagina

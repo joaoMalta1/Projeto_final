@@ -1,4 +1,6 @@
 from flask import Flask,  render_template, request, jsonify
+import json
+import os
 
 app = Flask(__name__)
 
@@ -6,38 +8,110 @@ conjuntos_teste = []
 
 @app.route("/")
 def home():
-    return render_template('html/home.html')
+    conjuntos = []
+    caminho_json = os.path.join("db", "conjuntos.json")
+
+    if os.path.exists(caminho_json):
+        try:
+            with open(caminho_json, "r", encoding="utf-8") as f:
+                conjuntos = json.load(f)
+        except Exception as e:
+            print(f"Erro ao carregar conjuntos: {e}")
+    return render_template('html/home.html', conjuntos=conjuntos)
 
 @app.route("/registra_conjunto", methods=['POST'])
 def registra_conjunto():
     data = request.get_json()
     novo_conjunto = data.get("titulo")
-    if novo_conjunto:
-        contagens = []
-        conjuntos_teste.append([novo_conjunto, contagens])
-        print(conjuntos_teste)
-        return jsonify({"status": "ok", "mensagem": "vonjunto registrado"}) ,200
-    else:
+    if not novo_conjunto:
         return jsonify({"status": "erro", "mensagem": "titulo ausente"}), 400
+    caminho_json = os.path.join("db", "conjuntos.json")
+    if os.path.exists(caminho_json):
+        try:
+            with open(caminho_json, "r", encoding="utf-8") as f:
+                conjuntos = json.load(f)
+        except Exception as e:
+            print(f"Erro ao ler o JSON: {e}")
+            conjuntos = []
+    else:
+        conjuntos = []
+    if any(conjunto.get("titulo") == novo_conjunto for conjunto in conjuntos):
+        return jsonify({"status": "erro", "mensagem": "Conjunto já existe"}), 409
+    conjuntos.append({ "titulo": novo_conjunto })
+    try:
+        with open(caminho_json, "w", encoding="utf-8") as f:
+            json.dump(conjuntos, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Erro ao escrever o JSON: {e}")
+        return jsonify({"status": "erro", "mensagem": "Erro ao salvar conjunto"}), 500
+    return jsonify({"status": "ok", "mensagem": "Conjunto registrado"}), 200
 
 
 
 @app.route("/conjuntos/<string:titulo_conjunto>")
+@app.route("/conjuntos/<string:titulo_conjunto>")
 def contadores(titulo_conjunto):
-    for i in conjuntos_teste:
-        if(i[0] == titulo_conjunto):
-            print(f"achou o conjunto {i[0]}")
-            return render_template('html/conjuntos.html', contadores_conjunto = i[1:])
+    caminho_json = os.path.join("db", "conjuntos.json")
+
+    if not os.path.exists(caminho_json):
+        return "Nenhum conjunto encontrado", 404
+
+    try:
+        with open(caminho_json, "r", encoding="utf-8") as f:
+            conjuntos = json.load(f)
+    except Exception as e:
+        print(f"Erro ao ler o JSON: {e}")
+        return "Erro ao carregar conjuntos", 500
+
+    for conjunto in conjuntos:
+        if conjunto.get("titulo") == titulo_conjunto:
+            contagens = conjunto.get("contagens", [])
+            return render_template('html/conjuntos.html', contadores_conjunto=contagens)
+
+    return "Conjunto não encontrado", 404
 
 
-@app.route("/adiciona_contagem/<string:titulo_conjunto>", methods=['POST'])
+
+@app.route("/adiciona_contagem/<string:titulo_conjunto>", methods=["POST"])
 def adiciona_contagem(titulo_conjunto):
-    for i in conjuntos_teste:
-        if i[0] == titulo_conjunto:
-            i[1].append(0)  # Adiciona uma nova contagem (ou contador)
-            print(f"Conjunto {i[0]} contadores {i[1]}")
-            return jsonify({"status": "ok"}), 200
-    return jsonify({"status": "erro", "mensagem": "conjunto não encontrado"}), 404
+    data = request.get_json()
+    nome = data.get("nome")
+    passo = data.get("passo")
+    unidade = data.get("unidade")
+
+    if not nome or not passo or not unidade:
+        return jsonify({"status": "erro", "mensagem": "Dados incompletos"}), 400
+
+    caminho_json = os.path.join("db", "conjuntos.json")
+
+    try:
+        with open(caminho_json, "r", encoding="utf-8") as f:
+            conjuntos = json.load(f)
+    except:
+        return jsonify({"status": "erro", "mensagem": "Erro ao ler o JSON"}), 500
+
+    # Adiciona contagem ao conjunto correspondente
+    for conjunto in conjuntos:
+        if conjunto.get("titulo") == titulo_conjunto:
+            if "contagens" not in conjunto:
+                conjunto["contagens"] = []
+            conjunto["contagens"].append({
+                "nome": nome,
+                "passo": int(passo),
+                "unidade": unidade
+            })
+            break
+    else:
+        return jsonify({"status": "erro", "mensagem": "Conjunto não encontrado"}), 404
+
+    # Salva alterações
+    try:
+        with open(caminho_json, "w", encoding="utf-8") as f:
+            json.dump(conjuntos, f, indent=2, ensure_ascii=False)
+    except:
+        return jsonify({"status": "erro", "mensagem": "Erro ao salvar"}), 500
+
+    return jsonify({"status": "ok", "mensagem": "Contagem adicionada"}), 200
 
 
 @app.errorhandler(404)

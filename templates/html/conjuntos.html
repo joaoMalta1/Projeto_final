@@ -40,6 +40,13 @@
   <button id="nova_contagem" type="button">+</button>
 
   <div id="cards-container"></div>
+  {% for contagem in contadores_conjunto %}
+    <div class="card">
+      <strong>{{ contagem.nome }}</strong><br>
+      Passo: {{ contagem.passo }} {{ contagem.unidade }}
+    </div>
+  {% endfor %}
+
   <div id="modal">
     <div id="modal-content">
       <h3>Criar nova contagem</h3>
