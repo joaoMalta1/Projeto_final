@@ -6,14 +6,16 @@
 
 MCUFRIEND_kbv tela;
 int qtd[4] = {0, 99, 999, 1000};
-String contagem = "Setor";
-int altura = 50;
-unsigned long instanteAnteriorDeDeteccao = 0;
-bool posicaoAnterior; 
-bool posicao;
 unsigned long temposPressionados[4] = {0, 0, 0, 0};
 int space[4] = {0, 0, 0, 0};
 String unidades[4] = {"g", "M", "L", "mm"};
+String contagem = "Setor";
+
+int altura = 50;
+bool posicaoAnterior; 
+bool posicao;
+bool contagemAlterada = false;
+unsigned long ultimaAlteracao = 0;
 
 int enderecoQtd = 0; //8 bytes -> de 0 a 7
 int enderecoContagem = enderecoQtd + 8; // 1 + 20 (max de caracteres) ->8 a 28
@@ -53,11 +55,17 @@ void setup() {
 void loop () {
 
   btn1.process();
-  btn2.process();
-  btn3.process();
-  btn4.process();
+	btn2.process();
+	btn3.process();
+	btn4.process();
 
-// esperarDadosSerial();
+  // esperarDadosSerial();
+
+  if (contagemAlterada && (millis() - ultimaAlteracao > 5000)) {
+    salvarDadosNaEEPROM();
+    contagemAlterada = false;
+    Serial.println("Dados salvos após 5 segundos");
+  }
 
 }
 
@@ -110,12 +118,14 @@ void aumentaOuDiminui(GFButton& botao){
 void aumentarContagem(GFButton& botao, int indice) {
   qtd[indice]++;
   atualizaTela(indice);
-  salvarDadosNaEEPROM();
+  contagemAlterada = true;
+  ultimaAlteracao = millis();
 }
 void diminuirContagem(GFButton& botao, int indice) {
   qtd[indice]--;
   atualizaTela(indice);
-  salvarDadosNaEEPROM();
+  contagemAlterada = true;
+  ultimaAlteracao = millis();
 }
 
 void mostrarPrimeiraColuna(){
@@ -226,6 +236,7 @@ void salvarDadosNaEEPROM() {
     EEPROM.put(enderecoContagem + 1 + i, contagem[i]);
   }
 
+
   // Salvar unidades[4] 
   int enderecoAtual = enderecoUnidades;
   for (int i = 0; i < 4; i++) {
@@ -269,8 +280,9 @@ void carregarDadosDaEEPROM() {
 void esperarDadosSerial() {
 /*
 QTD:10,20,30,40
-NOME:SetorA
-UNI:g,L,mm,kg
+Exemplo: NOME:SetorA
+Exemplo: UNI:g,L,mm,kg
+
 */
 
   if (Serial.available() > 0) {
@@ -313,7 +325,8 @@ UNI:g,L,mm,kg
     Serial.println("Unidades recebidas!");
   }
 
-  salvarDadosNaEEPROM()
+  dadosAlterados = true;
+  ultimaAlteracao = millis();
 
 }
 
