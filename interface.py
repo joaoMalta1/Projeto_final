@@ -10,7 +10,6 @@ conjuntos_teste = []
 def home():
     conjuntos = []
     caminho_json = os.path.join("db", "conjuntos.json")
-
     if os.path.exists(caminho_json):
         try:
             with open(caminho_json, "r", encoding="utf-8") as f:
@@ -49,25 +48,20 @@ def registra_conjunto():
 
 
 @app.route("/conjuntos/<string:titulo_conjunto>")
-@app.route("/conjuntos/<string:titulo_conjunto>")
 def contadores(titulo_conjunto):
     caminho_json = os.path.join("db", "conjuntos.json")
-
     if not os.path.exists(caminho_json):
         return "Nenhum conjunto encontrado", 404
-
     try:
         with open(caminho_json, "r", encoding="utf-8") as f:
             conjuntos = json.load(f)
     except Exception as e:
         print(f"Erro ao ler o JSON: {e}")
         return "Erro ao carregar conjuntos", 500
-
     for conjunto in conjuntos:
         if conjunto.get("titulo") == titulo_conjunto:
             contagens = conjunto.get("contagens", [])
             return render_template('html/conjuntos.html', contadores_conjunto=contagens)
-
     return "Conjunto não encontrado", 404
 
 
@@ -78,19 +72,14 @@ def adiciona_contagem(titulo_conjunto):
     nome = data.get("nome")
     passo = data.get("passo")
     unidade = data.get("unidade")
-
     if not nome or not passo or not unidade:
         return jsonify({"status": "erro", "mensagem": "Dados incompletos"}), 400
-
     caminho_json = os.path.join("db", "conjuntos.json")
-
     try:
         with open(caminho_json, "r", encoding="utf-8") as f:
             conjuntos = json.load(f)
     except:
         return jsonify({"status": "erro", "mensagem": "Erro ao ler o JSON"}), 500
-
-    # Adiciona contagem ao conjunto correspondente
     for conjunto in conjuntos:
         if conjunto.get("titulo") == titulo_conjunto:
             if "contagens" not in conjunto:
@@ -104,7 +93,6 @@ def adiciona_contagem(titulo_conjunto):
     else:
         return jsonify({"status": "erro", "mensagem": "Conjunto não encontrado"}), 404
 
-    # Salva alterações
     try:
         with open(caminho_json, "w", encoding="utf-8") as f:
             json.dump(conjuntos, f, indent=2, ensure_ascii=False)
@@ -121,12 +109,6 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('html/erro.html', erro=500), 500
-
-
-# @app.route("/conjuntos/detalhes")
-# def detalhes():
-#     print(f"conjuntos {conjuntos_teste}")
-#     return render_template('html/detalhes.html', conjuntos=conjuntos_teste)
 
 if __name__ == "__main__":
     app.run()
