@@ -88,7 +88,8 @@ def adiciona_contagem(titulo_conjunto):
                 "nome": nome,
                 "passo": int(passo),
                 "unidade": unidade,
-                "quantidade": 0
+                "quantidade": 0,
+                "historico": []
             })
             break
     else:
