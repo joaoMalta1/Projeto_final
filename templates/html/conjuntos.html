@@ -7,6 +7,8 @@
 <body>
   <button id="nova_contagem" type="button">+</button>
   <button id="enviar-arduino" type="button">Enviar dados</button>
+  <button id="receber-arduino" type="button">Receber dados</button>
+
   <button id="voltar" type="button" onclick="window.location.href='/'"> voltar </button>
 
   <div id="cards-container">
@@ -54,6 +56,23 @@
     const confirmar = document.getElementById("confirmar");
     const cancelar = document.getElementById("cancelar");
     const enviarArduinoBtn = document.getElementById("enviar-arduino");
+    const receberArduinoBtn = document.getElementById("receber-arduino");
+
+receberArduinoBtn.addEventListener("click", () => {
+  fetch("/recebe_arduino", {
+    method: "POST"
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Resposta:", data);
+    alert(data.mensagem);
+  })
+  .catch(err => {
+    console.error("Erro ao receber dados do Arduino:", err);
+    alert("Erro ao receber dados.");
+  });
+});
+
   enviarArduinoBtn.addEventListener("click", () => {
     fetch(`/envia_arduino/${tituloConjunto}`, {
       method: "POST"
