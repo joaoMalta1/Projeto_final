@@ -40,6 +40,9 @@ GFButton btn4(A11);
 void setup() {
 
   Serial.begin(9600);
+  Serial1.begin(9600);
+  //Serial1.setTimeout(10); -> é necessario?
+
   carregarDadosDaEEPROM();
   esperarDadosSerial();
 
@@ -77,12 +80,12 @@ void loop () {
     contagemAlterada = false;
     
     Serial.println("Dados salvos após 5 segundos");
+    //se for a cada 5 segundo aqui coloco o print da serial para o python
+    enviarDadosSerial();
     tam_historico_botoes = 0;
   }
 
 }
-
-
 
 void verificaPressionado(GFButton& botao) {
   int i;
@@ -292,10 +295,28 @@ void carregarDadosDaEEPROM() {
   EEPROM.put(tam_total + 1, tam_botoes_historico_total );
   
 }
+void enviarDadosSerial(){
 
+  String texto = nome_contagem + ", " + num + ", ";
+
+  int = 0;
+  while(i < num){
+    texto += contagem[i].nome + ", " +  contagem[i].passo + ", " + contagem[i].unidade + ", " + contagem[i].qtd;
+    i++;
+  }
+  //DUVIDA: tenho que colocar algo aqui no meio informando que esta passando pra parte de botoes pressionados?
+  int j = 0;
+  while(j < tam_botoes_historico_total){
+    texto += ", " + botao_press[j];
+  
+  }
+  Serial1.println(texto);
+
+
+}
 
 void esperarDadosSerial() {
-  // titulo, num, nome, passo, unidsde, quantidade ...
+  // titulo, num, nome, passo, unidade, quantidade ...
   // Setor, 3, setorA, 1, kg, 10, setorB, 2, g, 2, setorC, 4, mm, 0
   int pos_f;
 
@@ -362,3 +383,7 @@ void esperarDadosSerial() {
   }
 
 }
+
+
+
+
