@@ -4,55 +4,37 @@
   <meta charset="UTF-8">
   <title>Conjuntos</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/conjuntos.css') }}">
-  <style>
-    /* Estilo simples do modal */
-    #modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-    }
-
-    #modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      min-width: 300px;
-    }
-
-    .card {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin: 10px;
-      border-radius: 8px;
-    }
-
-    #nova_contagem {
-      margin: 10px;
-    }
-  </style>
-</head>
-
 <body>
   <button id="nova_contagem" type="button">+</button>
+  <button id="voltar" type="button" onclick="window.location.href='/'"> <- </button>
 
-  <div id="cards-container"></div>
-  {% for contagem in contadores_conjunto %}
-    <div class="card">
-      <strong>{{ contagem.nome }}</strong><br>
-      Passo: {{ contagem.passo }} {{ contagem.unidade }}
-    </div>
-  {% endfor %}
+  <div id="cards-container">
+    {% for contagem in contadores_conjunto %}
+      <div class="card">
+        <strong>{{ contagem.nome }}</strong><br>
+        Passo: {{ contagem.passo }} {{ contagem.unidade }}
+      </div>
+    {% endfor %}
+  </div>
+  
 
   <div id="modal">
     <div id="modal-content">
       <h3>Criar nova contagem</h3>
       <label>Nome: <input type="text" id="nome"></label><br>
       <label>Passo: <input type="number" id="passo"></label><br>
-      <label>Unidade: <input type="text" id="unidade"></label><br><br>
+      
+      <label>Unidade:
+        <input type="text" id="unidade" placeholder="Digite ou escolha abaixo">
+      </label>
+      
+      <div id="opcoes-unidade">
+        <option class="opcao-unidade">cm</option>
+        <option class="opcao-unidade">metro</option>
+        <option class="opcao-unidade">kg</option>
+        <option class="opcao-unidade">g</option>
+      </div>
+      
       <button id="confirmar">Adicionar</button>
       <button id="cancelar">Cancelar</button>
     </div>
@@ -78,6 +60,16 @@
         alert("Limite de contagens atingido.");
       }
     });
+
+  const campoUnidade = document.getElementById("unidade");
+  const opcoes = document.querySelectorAll(".opcao-unidade");
+
+  opcoes.forEach(opcao => {
+    opcao.addEventListener("click", () => {
+      campoUnidade.value = opcao.textContent;
+    });
+  });
+
 
     confirmar.addEventListener("click", () => {
       const nome = document.getElementById("nome").value;

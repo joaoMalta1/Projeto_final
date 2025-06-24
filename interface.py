@@ -87,7 +87,8 @@ def adiciona_contagem(titulo_conjunto):
             conjunto["contagens"].append({
                 "nome": nome,
                 "passo": int(passo),
-                "unidade": unidade
+                "unidade": unidade,
+                "quantidade": 0
             })
             break
     else:

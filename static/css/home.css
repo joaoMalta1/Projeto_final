@@ -1,23 +1,111 @@
+/* Importa uma fonte moderna do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+/* Variáveis de tema */
+:root {
+  --bg-color: #f5f7fa;
+  --primary-color: #0066cc;
+  --secondary-color: #ffffff;
+  --text-color: #333;
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  --border-radius: 8px;
+  --transition-speed: 0.3s;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+form#nome_contagem {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+form#nome_contagem input[type="text"] {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  width: 250px;
+}
+
+form#nome_contagem input[type="submit"] {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color var(--transition-speed);
+}
+
+form#nome_contagem input[type="submit"]:hover {
+  background-color: #004999;
+}
+
+/* Cards */
+#cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+}
+
 .card {
-	border: 2px solid #0a52b1;
-	padding: 1rem;
-	margin-top: 1rem;
-	width: 200px;
-	cursor: pointer;
-	
+  background-color: var(--secondary-color);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  box-shadow: 0 4px 10px var(--card-shadow);
+  cursor: pointer;
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  width: 200px;
+  text-align: center;
+  font-weight: bold;
+  color: var(--primary-color);
 }
 
-.card:hover{
-background-color: rgb(118, 118, 201);
-color: white;
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px var(--card-shadow);
+}
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
 }
 
-.card:active{
-background-color: #0a52b1;
+.modal-conteudo {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 300px;
 }
 
-input[type="text"] 
-{
-	padding: 0.4rem;
-	font-size: 1rem;
+.fechar {
+  float: right;
+  font-size: 20px;
+  cursor: pointer;
 }
