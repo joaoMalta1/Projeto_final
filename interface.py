@@ -1,9 +1,9 @@
 from flask import Flask,  render_template, request, jsonify
 import json
 import os
+from serial import Serial 
 
 app = Flask(__name__)
-
 conjuntos_teste = []
 
 @app.route("/")
@@ -111,6 +111,41 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_server_error(e):
     return render_template('html/erro.html', erro=500), 500
+
+@app.route("/envia_arduino/<string:titulo_conjunto>", methods=["POST"])
+def envia_arduino(titulo_conjunto):
+    caminho_json = os.path.join("db", "conjuntos.json")
+    if os.path.exists(caminho_json):
+        with open(caminho_json, "r", encoding="utf-8") as f:
+            dados_json = json.load(f)
+    for conjunto in dados_json:
+        if conjunto.get("titulo") == titulo_conjunto:
+            titulo = conjunto["titulo"]
+            contagens = conjunto["contagens"]
+            partes = [titulo, str(len(contagens))]
+            for contagem in contagens:
+                partes.append(contagem["nome"])
+                partes.append(str(contagem["passo"]))
+                partes.append(contagem["unidade"])
+                partes.append(str(contagem["quantidade"]))
+            linha_serial = ",".join(partes) + "\n"
+            print(f"Enviando para o Arduino:{linha_serial}")
+            try:
+                serial = Serial("/dev/serial0", baudrate=9600)
+                serial.write(linha_serial.encode("utf-8"))
+                serial.close()
+                return jsonify({"status": "ok", "mensagem": "Enviado ao Arduino"})
+            except:
+                return jsonify({"status": "erro", "mensagem": "Arduino ao comunicar com arduino"})
+    return jsonify({"status": "erro", "mensagem": "Conjunto não encontrado"}), 404
+
+
+# @app.route("/adiciona_contagem/<string:titulo_conjunto>", methods=["POST"])
+# def recebe_arduino():
+#     dados_serial= Serial("/dev/serial0", baudrate=9600) 
+#     texto_recebido = dados_serialreadline().decode().strip()
+
+
 
 if __name__ == "__main__":
     app.run()

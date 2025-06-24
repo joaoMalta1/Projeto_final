@@ -1,0 +1,42 @@
+[
+  {
+    "titulo": "ingresos",
+    "contagens": [
+      {
+        "nome": "setor a",
+        "passo": 3,
+        "unidade": "unidade",
+        "quantidade": 0,
+        "historico": []
+      },
+      {
+        "nome": "setor b ",
+        "passo": 10,
+        "unidade": "unidade",
+        "quantidade": 0,
+        "historico": []
+      }
+    ]
+  },
+
+  {
+    "titulo": "novo",
+    "contagens": 
+	[
+      {
+        "nome": "teste1",
+        "passo": 3,
+        "unidade": "cm",
+        "quantidade": 0,
+        "historico": []
+      },
+      {
+        "nome": "camisas",
+        "passo": 1,
+        "unidade": "pacote",
+        "quantidade": 0,
+        "historico": []
+      }
+    ]
+	}
+]

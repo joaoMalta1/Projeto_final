@@ -6,7 +6,8 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/conjuntos.css') }}">
 <body>
   <button id="nova_contagem" type="button">+</button>
-  <button id="voltar" type="button" onclick="window.location.href='/'"> <- </button>
+  <button id="enviar-arduino" type="button">Enviar dados</button>
+  <button id="voltar" type="button" onclick="window.location.href='/'"> voltar </button>
 
   <div id="cards-container">
     {% for contagem in contadores_conjunto %}
@@ -52,7 +53,23 @@
     const modal = document.getElementById("modal");
     const confirmar = document.getElementById("confirmar");
     const cancelar = document.getElementById("cancelar");
-
+    const enviarArduinoBtn = document.getElementById("enviar-arduino");
+  enviarArduinoBtn.addEventListener("click", () => {
+    fetch(`/envia_arduino/${tituloConjunto}`, {
+      method: "POST"
+    })
+    .then(response => {
+      if (response.ok) {
+        alert("Dados enviados ao Arduino com sucesso!");
+      } else {
+        alert("Erro ao enviar para o Arduino.");
+      }
+    })
+    .catch(error => {
+      console.error("Erro:", error);
+      alert("Erro ao comunicar com o servidor.");
+    });
+  });
     novaContagemBtn.addEventListener("click", () => {
       if (contagemAtual < limite) {
         modal.style.display = "flex";
