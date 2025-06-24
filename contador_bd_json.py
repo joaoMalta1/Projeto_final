@@ -3,11 +3,15 @@ from tkinter import ttk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
-import json
+import json, os
 
 # ==== Carregar o JSON ====
-with open('dados_contadores.json', 'r', encoding='utf-8') as file:
-    dados = json.load(file)
+path_json = os.path.join("db", "conjuntos.json")
+if os.path.exists(path_json):
+    with open(path_json, "r", encoding="utf-8") as f:
+        dados = json.load(f)
+
+
 
 # ==== Função que monta os dados a partir do registro escolhido ====
 def processar_registro(registro):
