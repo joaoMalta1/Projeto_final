@@ -10,7 +10,7 @@
         "historico": []
       },
       {
-        "nome": "setor b ",
+        "nome": "setor b",
         "passo": 10,
         "unidade": "unidade",
         "quantidade": 0,
@@ -18,16 +18,14 @@
       }
     ]
   },
-
   {
     "titulo": "novo",
-    "contagens": 
-	[
+    "contagens": [
       {
         "nome": "teste1",
         "passo": 3,
         "unidade": "cm",
-        "quantidade": 0,
+        "quantidade": 7,
         "historico": []
       },
       {
@@ -38,5 +36,5 @@
         "historico": []
       }
     ]
-	}
+  }
 ]

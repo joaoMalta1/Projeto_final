@@ -9,10 +9,10 @@ conjuntos_teste = []
 @app.route("/")
 def home():
     conjuntos = []
-    caminho_json = os.path.join("db", "conjuntos.json")
-    if os.path.exists(caminho_json):
+    path_json = os.path.join("db", "conjuntos.json")
+    if os.path.exists(path_json):
         try:
-            with open(caminho_json, "r", encoding="utf-8") as f:
+            with open(path_json, "r", encoding="utf-8") as f:
                 conjuntos = json.load(f)
         except Exception as e:
             print(f"Erro ao carregar conjuntos: {e}")
@@ -24,10 +24,10 @@ def registra_conjunto():
     novo_conjunto = data.get("titulo")
     if not novo_conjunto:
         return jsonify({"status": "erro", "mensagem": "titulo ausente"}), 400
-    caminho_json = os.path.join("db", "conjuntos.json")
-    if os.path.exists(caminho_json):
+    path_json = os.path.join("db", "conjuntos.json")
+    if os.path.exists(path_json):
         try:
-            with open(caminho_json, "r", encoding="utf-8") as f:
+            with open(path_json, "r", encoding="utf-8") as f:
                 conjuntos = json.load(f)
         except Exception as e:
             print(f"Erro ao ler o JSON: {e}")
@@ -38,7 +38,7 @@ def registra_conjunto():
         return jsonify({"status": "erro", "mensagem": "Conjunto já existe"}), 409
     conjuntos.append({ "titulo": novo_conjunto })
     try:
-        with open(caminho_json, "w", encoding="utf-8") as f:
+        with open(path_json, "w", encoding="utf-8") as f:
             json.dump(conjuntos, f, indent=2, ensure_ascii=False)
     except Exception as e:
         print(f"Erro ao escrever o JSON: {e}")
@@ -49,11 +49,11 @@ def registra_conjunto():
 
 @app.route("/conjuntos/<string:titulo_conjunto>")
 def contadores(titulo_conjunto):
-    caminho_json = os.path.join("db", "conjuntos.json")
-    if not os.path.exists(caminho_json):
+    path_json = os.path.join("db", "conjuntos.json")
+    if not os.path.exists(path_json):
         return "Nenhum conjunto encontrado", 404
     try:
-        with open(caminho_json, "r", encoding="utf-8") as f:
+        with open(path_json, "r", encoding="utf-8") as f:
             conjuntos = json.load(f)
     except Exception as e:
         print(f"Erro ao ler o JSON: {e}")
@@ -74,9 +74,9 @@ def adiciona_contagem(titulo_conjunto):
     unidade = data.get("unidade")
     if not nome or not passo or not unidade:
         return jsonify({"status": "erro", "mensagem": "Dados incompletos"}), 400
-    caminho_json = os.path.join("db", "conjuntos.json")
+    path_json = os.path.join("db", "conjuntos.json")
     try:
-        with open(caminho_json, "r", encoding="utf-8") as f:
+        with open(path_json, "r", encoding="utf-8") as f:
             conjuntos = json.load(f)
     except:
         return jsonify({"status": "erro", "mensagem": "Erro ao ler o JSON"}), 500
@@ -96,7 +96,7 @@ def adiciona_contagem(titulo_conjunto):
         return jsonify({"status": "erro", "mensagem": "Conjunto não encontrado"}), 404
 
     try:
-        with open(caminho_json, "w", encoding="utf-8") as f:
+        with open(path_json, "w", encoding="utf-8") as f:
             json.dump(conjuntos, f, indent=2, ensure_ascii=False)
     except:
         return jsonify({"status": "erro", "mensagem": "Erro ao salvar"}), 500
@@ -114,9 +114,9 @@ def internal_server_error(e):
 
 @app.route("/envia_arduino/<string:titulo_conjunto>", methods=["POST"])
 def envia_arduino(titulo_conjunto):
-    caminho_json = os.path.join("db", "conjuntos.json")
-    if os.path.exists(caminho_json):
-        with open(caminho_json, "r", encoding="utf-8") as f:
+    path_json = os.path.join("db", "conjuntos.json")
+    if os.path.exists(path_json):
+        with open(path_json, "r", encoding="utf-8") as f:
             dados_json = json.load(f)
     for conjunto in dados_json:
         if conjunto.get("titulo") == titulo_conjunto:
@@ -139,13 +139,73 @@ def envia_arduino(titulo_conjunto):
                 return jsonify({"status": "erro", "mensagem": "Arduino ao comunicar com arduino"})
     return jsonify({"status": "erro", "mensagem": "Conjunto não encontrado"}), 404
 
+@app.route("/recebe_arduino", methods=["POST"])
+def recebe_arduino():
 
-# @app.route("/adiciona_contagem/<string:titulo_conjunto>", methods=["POST"])
-# def recebe_arduino():
-#     dados_serial= Serial("/dev/serial0", baudrate=9600) 
-#     texto_recebido = dados_serialreadline().decode().strip()
+    # serial = Serial("/dev/serial0", baudrate=9600, timeout=2)
+    # linha = serial.readline().decode("utf-8").strip()
+    # serial.close()
+    path_json = os.path.join("db", "conjuntos.json")
+    if not os.path.exists(path_json):
+        return jsonify({"erro": "Arquivo JSON não encontrado."}), 500
+
+    linha = 'ingresos, 2, setor a, 3, unidade, 0, setor b , 10, unidade, 0, novo, 2, teste1, 3, cm, 10'
+    partes = [p.strip() for p in linha.split(",")]
+    print("Recebido:", partes)
+
+    recebidos = []
+    i = 0
+    while i < len(partes):
+        if i + 1 >= len(partes): #verifica se tem informação de pelo menos um conjunto
+            break
+
+        titulo = partes[i]
+        num_contagens = int(partes[i+1])
+        i += 2
+
+        contagens = []
+        for _ in range(num_contagens):
+            if i + 3 >= len(partes):
+                break
+            nome = partes[i]
+            passo = int(partes[i+1])
+            unidade = partes[i+2]
+            quantidade = int(partes[i+3])
+            contagens.append({
+                "nome": nome.strip().lower(),
+                "passo": passo,
+                "unidade": unidade,
+                "quantidade": quantidade
+            })
+            i += 4
+
+        recebidos.append({
+            "titulo": titulo.strip().lower(),
+            "contagens": contagens
+        }) #armazena os dicionarios com as informacoes pro json na lista
 
 
+    with open(path_json, "r", encoding="utf-8") as f:
+        dados_json = json.load(f)
+
+    atualizou = False
+    for recebido in recebidos:
+        for conjunto in dados_json:
+            if conjunto["titulo"].strip().lower() == recebido["titulo"]:
+                for nova in recebido["contagens"]:
+                    for contagem in conjunto["contagens"]:
+                        if contagem["nome"].strip().lower() == nova["nome"]:
+                            contagem["quantidade"] = nova["quantidade"]
+                            contagem["passo"] = nova["passo"]
+                            contagem["unidade"] = nova["unidade"]
+                atualizou = True
+
+    if atualizou:
+        with open(path_json, "w", encoding="utf-8") as f:
+            json.dump(dados_json, f, indent=2, ensure_ascii=False)
+        return jsonify({"status": "ok", "mensagem": "JSON atualizado com sucesso."})
+    else:
+        return jsonify({"status": "vazio", "mensagem": "Nenhum conjunto encontrado."})
 
 if __name__ == "__main__":
     app.run()
