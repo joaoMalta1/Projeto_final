@@ -14,7 +14,7 @@ struct contagem{
   char nome[20];
   char unidade[3];
   int passo;
-  int qtd;
+  int qtd = -1;
 }contagem[4]; 
 
 
@@ -173,7 +173,6 @@ void mostrarSegundaColuna() {
     int y = 90 + i * altura;
 
     if(contagem[i].qtd != -1){
-      
       if( contagem[i].qtd < 10){
         space[i] = 55;
       }
@@ -194,7 +193,10 @@ void mostrarSegundaColuna() {
       escolheCor(i);
       tela.setTextSize(3);
       tela.print(String(contagem[i].qtd)+contagem[i].unidade);
-      }
+    }
+      
+      
+      
 
   }
 }
