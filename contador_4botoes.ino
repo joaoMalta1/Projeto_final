@@ -299,18 +299,18 @@ void carregarDadosDaEEPROM() {
 }
 void enviarDadosSerial(){
 
-  String texto = String(titulo) + ", " + String(num) + ", ";
+  String texto = String(titulo) + ", " + String(num);
 
   int i = 0;
   while(i < num){
-    texto += String(contagem[i].nome) + ", " +  String(contagem[i].passo) + ", " + String(contagem[i].unidade) + ", " + String(contagem[i].qtd);
+    texto += ", " + String(contagem[i].nome) + ", " +  String(contagem[i].passo) + ", " + String(contagem[i].unidade) + ", " + String(contagem[i].qtd);
     i++;
   }
-  //DUVIDA: tenho que colocar algo aqui no meio informando que esta passando pra parte de botoes pressionados?
+  texto += "historico";
   int j = 0;
   while(j < tam_botoes_historico_total){
     texto += ", " + botao_press[j];
-  
+    j++;
   }
   Serial.println(texto);
 
