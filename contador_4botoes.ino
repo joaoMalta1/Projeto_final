@@ -14,7 +14,7 @@ struct contagem{
   char nome[20];
   char unidade[3];
   int passo;
-  int qtd = -1;
+  int qtd = -2;
 }contagem[4]; 
 
 
@@ -76,7 +76,7 @@ void loop () {
     salvarDadosNaEEPROM();
     contagemAlterada = false;
     
-    Serial.println("Dados salvos após 5 segundos");
+    //Serial.println("Dados salvos após 5 segundos");
 
     tam_historico_botoes = 0;
   }
@@ -109,7 +109,7 @@ void aumentaOuDiminui(GFButton& botao){
   else if (&botao == &btn4) 
 	  indice = 3;
 
-  if (contagem[indice].qtd != -1){
+  if (contagem[indice].qtd != -1 && contagem[indice].qtd != -2){
     if ( millis() - temposPressionados[indice] > 1000) {
       if (contagem[indice].qtd > 0) {
         diminuirContagem(botao, indice);
@@ -118,13 +118,13 @@ void aumentaOuDiminui(GFButton& botao){
       }
       botao_press[tam_historico_botoes] = -(indice + 1);
       
-      Serial.println(botao_press[tam_historico_botoes]);
+      //Serial.println(botao_press[tam_historico_botoes]);
       tam_historico_botoes++;
     }
     else if (millis() - temposPressionados[indice] < 1000){
       aumentarContagem(botao, indice);
       botao_press[tam_historico_botoes] = (indice + 1);
-      Serial.println(botao_press[tam_historico_botoes]);
+      //Serial.println(botao_press[tam_historico_botoes]);
       tam_historico_botoes++;
     }
   }
@@ -186,7 +186,7 @@ void mostrarSegundaColuna() {
         space[i] = 1;
       }
       
-      Serial.println(strlen(contagem[i].unidade));
+      //Serial.println(strlen(contagem[i].unidade));
       space[i] -= (strlen(contagem[i].unidade)*18); //largura da letra é 6 pixels no tamanho 3 = 18
       tela.setCursor(150 + space[i], y + i *6);  
       
@@ -306,13 +306,16 @@ void enviarDadosSerial(){
     texto += ", " + String(contagem[i].nome) + ", " +  String(contagem[i].passo) + ", " + String(contagem[i].unidade) + ", " + String(contagem[i].qtd);
     i++;
   }
-  texto += "historico";
+
+  texto += ", historico";
   int j = 0;
   while(j < tam_botoes_historico_total){
-    texto += ", " + botao_press[j];
+    
+    texto += ", " + String(botao_press[j]);
     j++;
   }
-  Serial.println(texto);
+
+ 
 
 
 }
@@ -328,15 +331,15 @@ void esperarDadosSerial() {
 
     if(texto.startsWith("configurar ")){
       texto.remove(0,11);
-      Serial.println("texto: ");
-      Serial.println(texto);
+      //Serial.println("texto: ");
+      //Serial.println(texto);
       
 
       pos_f = texto.indexOf(",");
       String titulo_str = texto.substring(0, pos_f); // a, -> a
       strcpy(titulo, titulo_str.c_str());
       texto.remove(0, pos_f+1); //remove até a virgula para no proximo pegar a virgula certa
-      Serial.println(titulo);
+      //Serial.println(titulo);
       //Serial.println(texto);
 
       pos_f = texto.indexOf(",");
@@ -381,8 +384,8 @@ void esperarDadosSerial() {
           contagem[i].qtd = texto.substring(0, pos_f).toInt();
           texto.remove(0, pos_f+1);
         }
-        Serial.println(String(contagem[i].qtd));
-        Serial.println(texto);
+        //Serial.println(String(contagem[i].qtd));
+        //Serial.println(texto);
       
         i++;    
       }
