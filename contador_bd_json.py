@@ -25,10 +25,10 @@ def processar_registro(registro):
     for evento in historico:
         for i in range(len(contadores)):
             if evento == i + 1:
-                valores[i] += 1  # Incremento
+                acumulado[i] += 1  # Incremento
             elif evento == -(i + 1):
-                valores[i] -= 1  # Decremento
-            evolucao[i].append(valores[i])  # <<< Agora dentro do loop!
+                acumulado[i] -= 1  # Decremento
+            evolucao[i].append(acumulado[i])  # <<< Agora dentro do loop!
 
 
 
