@@ -7,12 +7,12 @@
 MCUFRIEND_kbv tela;
 unsigned long temposPressionados[4] = {0, 0, 0, 0};
 int space[4] = {0, 0, 0, 0};
-String nome_contagem = "";
+char titulo[20] = "";
 byte num = 0;
 
 struct contagem{
-  String nome ;
-  String unidade;
+  char nome[20];
+  char unidade[3];
   int passo;
   int qtd;
 }contagem[4]; 
@@ -40,11 +40,8 @@ GFButton btn4(A11);
 void setup() {
 
   Serial.begin(9600);
-  Serial1.begin(9600);
-  //Serial1.setTimeout(10); -> é necessario?
 
   carregarDadosDaEEPROM();
-  esperarDadosSerial();
 
   tela.begin(tela.readID());
   tela.fillScreen(TFT_BLACK);
@@ -80,8 +77,7 @@ void loop () {
     contagemAlterada = false;
     
     Serial.println("Dados salvos após 5 segundos");
-    //se for a cada 5 segundo aqui coloco o print da serial para o python
-    enviarDadosSerial();
+
     tam_historico_botoes = 0;
   }
 
@@ -152,7 +148,7 @@ void mostrarPrimeiraColuna(){
 	tela.setTextColor(TFT_WHITE);
   tela.setTextSize(3);
   tela.setCursor(15, 30);
-  tela.print(nome_contagem);
+  tela.print(titulo);
 
   for (int i = 0; i < num; i++) {
     int y = 80 + i * altura ;
@@ -172,7 +168,7 @@ void mostrarSegundaColuna() {
   tela.setCursor(160, 30);
   tela.print("QTD");
   
-
+  
 	for (int i = 0; i < num; i++) {
     int y = 90 + i * altura;
     if( contagem[i].qtd < 10){
@@ -188,15 +184,13 @@ void mostrarSegundaColuna() {
       space[i] = 1;
     }
     
-    Serial.println(String(contagem[i].unidade.length()));
-    space[i] -= (contagem[i].unidade.length()*18); //largura da letra é 6 pixels no tamanho 3 = 18
+    Serial.println(strlen(contagem[i].unidade));
+    space[i] -= (strlen(contagem[i].unidade)*18); //largura da letra é 6 pixels no tamanho 3 = 18
     tela.setCursor(150 + space[i], y + i *6);  
     
     escolheCor(i);
-
     tela.setTextSize(3);
     tela.print(String(contagem[i].qtd)+contagem[i].unidade);
-    
   }
 }
 
@@ -216,7 +210,7 @@ void atualizaTela(int i){
   }
   
   tela.fillRect(110, y+ i *6, 120, 35, TFT_BLACK);
-  space[i] -= (contagem[i].unidade.length()*18);
+  space[i] -= (strlen(contagem[i].unidade)*18);
   tela.setCursor(150 + space[i], y + i *6);  
   
   escolheCor(i);
@@ -229,7 +223,7 @@ void atualizaTela(int i){
 
 void atualizaTelaSerial() {
   tela.fillScreen(TFT_BLACK); 
-  mostrarPrimeiraColuna();    
+  mostrarPrimeiraColuna();   
   mostrarSegundaColuna();     
 }
 
@@ -250,22 +244,21 @@ void escolheCor(int i){
 }
 
 void salvarDadosNaEEPROM() { 
-
-  EEPROM.put(0, nome_contagem);
-  int tam_titulo = sizeof(nome_contagem);
+  int tam_titulo = strlen(titulo) + 1; // \0
+  EEPROM.put(0, titulo);
+  
+  
   EEPROM.put(tam_titulo, num);
   // Salvar num structs
   for (int i = 0; i < num; i++){
-    EEPROM.put(tam_titulo+ (tam_contagem * i) + 1, contagem[i]);
+    EEPROM.put(tam_titulo + sizeof(int) + (tam_contagem * i) + 1, contagem[i]);
   }
-
-
   //salvar ordem de botoes pressionados 
   tam_total = tam_titulo + (tam_contagem * num) + 1;
   EEPROM.put(tam_total + 1, tam_historico_botoes ); //por ser int ocupa 2 bytes
   
   for (int i = 0; i < tam_historico_botoes; i++ ){
-    EEPROM.put(tam_total + 2 + i + tam_botoes_historico_total , botao_press[i]);
+    EEPROM.put(tam_total + sizeof(int) + i + tam_botoes_historico_total , botao_press[i]);
   }
   tam_botoes_historico_total += tam_historico_botoes;  
   
@@ -274,21 +267,23 @@ void salvarDadosNaEEPROM() {
 
 void carregarDadosDaEEPROM() {
   
-  EEPROM.get(0, nome_contagem);
-  int tam_titulo = sizeof(nome_contagem);
+  EEPROM.get(0, titulo);
+  
+  int tam_titulo = strlen(titulo) + 1; //
+
   EEPROM.get(tam_titulo, num);
+
   // Salvar num structs
   for (int i = 0; i < num; i++){
-    EEPROM.get(tam_titulo+ (tam_contagem * i) + 1, contagem[i]);
+    EEPROM.get(tam_titulo + sizeof(int) + (tam_contagem * i) + 1, contagem[i]);
   }
-
 
   //salvar ordem de botoes pressionados 
   tam_total = tam_titulo + (tam_contagem * num) + 1;
   EEPROM.get(tam_total + 1, tam_historico_botoes ); //por ser int ocupa 2 bytes
   
   for (int i = 0; i < tam_historico_botoes; i++ ){
-    EEPROM.get(tam_total + 2 + i + tam_botoes_historico_total , botao_press[i]);
+    EEPROM.get(tam_total + sizeof(int) + i + tam_botoes_historico_total , botao_press[i]);
   }
   tam_botoes_historico_total += tam_historico_botoes; 
 
@@ -297,11 +292,11 @@ void carregarDadosDaEEPROM() {
 }
 void enviarDadosSerial(){
 
-  String texto = nome_contagem + ", " + num + ", ";
+  String texto = String(titulo) + ", " + String(num) + ", ";
 
-  int = 0;
+  int i = 0;
   while(i < num){
-    texto += contagem[i].nome + ", " +  contagem[i].passo + ", " + contagem[i].unidade + ", " + contagem[i].qtd;
+    texto += String(contagem[i].nome) + ", " +  String(contagem[i].passo) + ", " + String(contagem[i].unidade) + ", " + String(contagem[i].qtd);
     i++;
   }
   //DUVIDA: tenho que colocar algo aqui no meio informando que esta passando pra parte de botoes pressionados?
@@ -310,7 +305,7 @@ void enviarDadosSerial(){
     texto += ", " + botao_press[j];
   
   }
-  Serial1.println(texto);
+  Serial.println(texto);
 
 
 }
@@ -323,59 +318,74 @@ void esperarDadosSerial() {
   if (Serial.available() > 0) {
     String texto = Serial.readStringUntil('\n');
     texto.trim();
-    
-    pos_f = texto.indexOf(",");
-    nome_contagem = texto.substring(0, pos_f); // a, -> a
-    texto.remove(0, pos_f+1); //remove até a virgula para no proximo pegar a virgula certa
-    Serial.println(nome_contagem);
-    Serial.println(texto);
 
-    pos_f = texto.indexOf(",");
-    num = texto.substring(0, pos_f).toInt();
-    Serial.println(String(num));
-    texto.remove(0, pos_f + 1);
-    Serial.println(num);
-    Serial.println(texto);
-
-    for (int j = 0; j < num; j++) {
-      contagem[j].qtd = -1;
-    }
-
-    int i = 0;
-    while(i < num){
-     
-      pos_f = texto.indexOf(",");
-      contagem[i].nome = texto.substring(0, pos_f);
-      texto.remove(0, pos_f+1);
-      Serial.println(contagem[i].nome);
-      Serial.println(texto);
-
-      pos_f = texto.indexOf(",");
-      contagem[i].passo = texto.substring(0, pos_f).toInt();
-      texto.remove(0, pos_f+1);
-      Serial.println(String(contagem[i].passo));
-      Serial.println(texto);
-
-      pos_f = texto.indexOf(",");
-      contagem[i].unidade = texto.substring(0, pos_f);
-      texto.remove(0, pos_f+1);
-      Serial.println(contagem[i].unidade);
+    if(texto.startsWith("configurar ")){
+      texto.remove(0,11);
+      Serial.println("texto: ");
       Serial.println(texto);
       
+
       pos_f = texto.indexOf(",");
-      if (pos_f == -1){ //Último valor, não tem mais vírgula
-        contagem[i].qtd = texto.toInt();
-        texto = ""; 
-      } else{
-        contagem[i].qtd = texto.substring(0, pos_f).toInt();
-        texto.remove(0, pos_f+1);
+      String titulo_str = texto.substring(0, pos_f); // a, -> a
+      strcpy(titulo, titulo_str.c_str());
+      texto.remove(0, pos_f+1); //remove até a virgula para no proximo pegar a virgula certa
+      Serial.println(titulo);
+      //Serial.println(texto);
+
+      pos_f = texto.indexOf(",");
+      num = texto.substring(0, pos_f).toInt();
+      //Serial.println(String(num));
+      texto.remove(0, pos_f + 1);
+      //Serial.println(num);
+      //Serial.println(texto);
+
+      for (int j = 0; j < num; j++) {
+        contagem[j].qtd = -1;
       }
-      Serial.println(String(contagem[i].qtd));
-      Serial.println(texto);
+
+      int i = 0;
+      while(i < num){
+      
+        pos_f = texto.indexOf(",");
+        String nome_str = texto.substring(0, pos_f);
+        strcpy(contagem[i].nome, nome_str.c_str());
+        texto.remove(0, pos_f+1);
+        //Serial.println(contagem[i].nome);
+        //Serial.println(texto);
+
+        pos_f = texto.indexOf(",");
+        contagem[i].passo = texto.substring(0, pos_f).toInt();
+        texto.remove(0, pos_f+1);
+        //Serial.println(String(contagem[i].passo));
+        //Serial.println(texto);
+
+        pos_f = texto.indexOf(",");
+        String unidade_str = texto.substring(0, pos_f);
+        strcpy(contagem[i].unidade, unidade_str.c_str());
+        texto.remove(0, pos_f+1);
+        //Serial.println(contagem[i].unidade);
+        //Serial.println(texto);
+        
+        pos_f = texto.indexOf(",");
+        if (pos_f == -1){ //Último valor, não tem mais vírgula
+          contagem[i].qtd = texto.toInt();
+          texto = ""; 
+        } else{
+          contagem[i].qtd = texto.substring(0, pos_f).toInt();
+          texto.remove(0, pos_f+1);
+        }
+        Serial.println(String(contagem[i].qtd));
+        Serial.println(texto);
+      
+        i++;    
+      }
     
-      i++;    
+      atualizaTelaSerial(); 
     }
-  atualizaTelaSerial(); 
+    if(texto.startsWith("enviar")){
+      enviarDadosSerial();
+
+    }
 
   contagemAlterada = true;
   ultimaAlteracao = millis();
@@ -383,7 +393,3 @@ void esperarDadosSerial() {
   }
 
 }
-
-
-
-
