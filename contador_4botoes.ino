@@ -171,26 +171,31 @@ void mostrarSegundaColuna() {
   
 	for (int i = 0; i < num; i++) {
     int y = 90 + i * altura;
-    if( contagem[i].qtd < 10){
-      space[i] = 55;
-    }
-    else if( contagem[i].qtd >= 10 && contagem[i].qtd < 100){
-      space[i] = 38;
-    }
-    else if(contagem[i].qtd >= 100 && contagem[i].qtd < 1000){
-      space[i] = 19;
-    }
-    else if(contagem[i].qtd >= 1000 && contagem[i].qtd < 9999){
-      space[i] = 1;
-    }
-    
-    Serial.println(strlen(contagem[i].unidade));
-    space[i] -= (strlen(contagem[i].unidade)*18); //largura da letra é 6 pixels no tamanho 3 = 18
-    tela.setCursor(150 + space[i], y + i *6);  
-    
-    escolheCor(i);
-    tela.setTextSize(3);
-    tela.print(String(contagem[i].qtd)+contagem[i].unidade);
+
+    if(contagem[i].qtd != -1){
+      
+      if( contagem[i].qtd < 10){
+        space[i] = 55;
+      }
+      else if( contagem[i].qtd >= 10 && contagem[i].qtd < 100){
+        space[i] = 38;
+      }
+      else if(contagem[i].qtd >= 100 && contagem[i].qtd < 1000){
+        space[i] = 19;
+      }
+      else if(contagem[i].qtd >= 1000 && contagem[i].qtd < 9999){
+        space[i] = 1;
+      }
+      
+      Serial.println(strlen(contagem[i].unidade));
+      space[i] -= (strlen(contagem[i].unidade)*18); //largura da letra é 6 pixels no tamanho 3 = 18
+      tela.setCursor(150 + space[i], y + i *6);  
+      
+      escolheCor(i);
+      tela.setTextSize(3);
+      tela.print(String(contagem[i].qtd)+contagem[i].unidade);
+      }
+
   }
 }
 
@@ -393,3 +398,6 @@ void esperarDadosSerial() {
   }
 
 }
+
+
+
