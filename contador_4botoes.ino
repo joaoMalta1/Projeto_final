@@ -2,6 +2,7 @@
 #include <MCUFRIEND_kbv.h>
 #include <GFButton.h>
 #include <EEPROM.h>
+#include <math.h>
 
 
 MCUFRIEND_kbv tela;
@@ -30,6 +31,13 @@ int tam_contagem = sizeof(contagem);
 int tam_total = 0;
 int tam_historico_botoes = 0;
 int tam_botoes_historico_total = 0;
+
+//calcular porcentagem da bateria
+float tensao_entrada = 0.0;
+float temp = 0.0;
+float r1 = 4000.0;
+float r2 = 5000.0;
+int porcentagem_bat = 0;
 
 
 GFButton btn1(A8);
@@ -70,6 +78,8 @@ void loop() {
   //Serial.println("aaaa");
   esperarDadosSerial();
 
+  porcentagem_bateria();
+
   if (contagemAlterada && (millis() - ultimaAlteracao > 5000)) {
     salvarDadosNaEEPROM();
     contagemAlterada = false;
@@ -78,6 +88,22 @@ void loop() {
 
     tam_historico_botoes = 0;
   }
+}
+
+void porcentagem_bateria(){
+  int valorAnalogico = analogRead(AO) // confirmar se essa é a porta
+  //The loop reads the analog value from the the analog input, and because the reference voltage is 5 V, 
+  //it multiples that value by 5, then divides by 1024 to calculate the actual voltage value. 
+  temp = (valorAnalogico * 5.0) / 1024.0;  //valor maximo é se valorAnalogico = 1023 -> 4,995
+  tensao_entrada = temp / (r2/(r1+r2));
+  porcentagem_bat = (int)round((tensao_entrada * 100.0)/4.995);
+  if (porcentagem_bat > 100) {
+    porcentagem_bat = 100;
+  }
+  tela.setTextColor(TFT_WHITE);
+  tela.setTextSize(2);
+  tela.setCursor(160, 10);
+  tela.print(String(porcentagem_bat)+"%");
 }
 
 void verificaPressionado(GFButton& botao) {
