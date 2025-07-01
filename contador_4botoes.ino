@@ -33,11 +33,12 @@ int tam_historico_botoes = 0;
 int tam_botoes_historico_total = 0;
 
 //calcular porcentagem da bateria
-float tensao_entrada = 0.0;
-float temp = 0.0;
-float r1 = 4000.0;
-float r2 = 5000.0;
-int porcentagem_bat = 0;
+int bateria = A5;
+int pinoControle = 7; //mudar para mega
+float r1 = 4000;
+float r2 = 5000;
+float divisor = r2/(r1+r2);
+unsigned long ultimaLeituraBateria = 0;
 
 
 GFButton btn1(A8);
@@ -49,6 +50,7 @@ void setup() {
 
   Serial.begin(9600);
   carregarDadosDaEEPROM();
+  pinMode(pinoControle, INPUT);
 
   tela.begin(tela.readID());
   tela.fillScreen(TFT_BLACK);
@@ -78,7 +80,10 @@ void loop() {
   //Serial.println("aaaa");
   esperarDadosSerial();
 
+  if (millis() - ultimaLeituraBateria >= 8000) {
   porcentagem_bateria();
+  ultimaLeituraBateria = millis();
+  }
 
   if (contagemAlterada && (millis() - ultimaAlteracao > 5000)) {
     salvarDadosNaEEPROM();
@@ -91,18 +96,25 @@ void loop() {
 }
 
 void porcentagem_bateria(){
-  int valorAnalogico = analogRead(AO) // confirmar se essa é a porta
+  //ATIVA O DIVISOR 
+  pinMode(pinoControle, OUTPUT);
+  digitalWrite(pinoControle, LOW); //terra temporario -> o resistor inferior (R2) é ligado ao terra
+
+
+ float valorAnalogico = analogRead(bateria);
   //The loop reads the analog value from the the analog input, and because the reference voltage is 5 V, 
   //it multiples that value by 5, then divides by 1024 to calculate the actual voltage value. 
-  temp = (valorAnalogico * 5.0) / 1024.0;  //valor maximo é se valorAnalogico = 1023 -> 4,995
-  tensao_entrada = temp / (r2/(r1+r2));
-  porcentagem_bat = (int)round((tensao_entrada * 100.0)/4.995);
-  if (porcentagem_bat > 100) {
-    porcentagem_bat = 100;
-  }
+  float temp = (valorAnalogico * 5.0) / 1024.0; //valor maximo, se valorAnalogico = 1023 -> 4,995
+  float tensao_entrada = temp / divisor;
+  int tensao = (int)round(tensao_entrada);
+  int porcentagem_bat = map(tensao, 0, 9, 0, 100);
+
+  //DESATIVA O DIVISOR
+  pinMode(pinoControle, INPUT); // pino entra em alta impedancia e "desliga" o divisor
+
   tela.setTextColor(TFT_WHITE);
   tela.setTextSize(2);
-  tela.setCursor(160, 10);
+  tela.setCursor(180, 10);
   tela.print(String(porcentagem_bat)+"%");
 }
 
