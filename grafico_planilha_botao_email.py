@@ -135,20 +135,19 @@ def salvar_email():
 # =========================
 def enviar_mensagem_telegram(dataframe, conjunto_contagem):
     try:
-        # Endereço da API do Telegram
-        endereco_base = f"https://api.telegram.org/bot7929499599:AAFau1XWBd8hxDAQ2xlwGing-S4bpAjAD-8"
+        
+        endereco_base = "https://api.telegram.org/bot7929499599:AAFau1XWBd8hxDAQ2xlwGing-S4bpAjAD-8"
         endereco_envio = endereco_base + "/sendMessage"
-
-        # Percorre as linhas do dataframe e monta mensagem para cada linha
+        # Monta uma única mensagem para todo o conjunto
+        mensagem_texto = f"Atualização de {conjunto_contagem.capitalize()}:\n"
+        # Percorre as linhas do dataframe e adiciona na mensagem
         for _, row in dataframe.iterrows():
-            mensagem_texto = f"Atualização de {conjunto_contagem.capitalize()}:\n"
             for coluna, valor in row.items():
-                mensagem_texto += f" ->{coluna}: {valor}\n"
-
-            # Monta o corpo da mensagem para enviar no Telegram
-            mensagem = {"chat_id": "5240952608", "text": mensagem_texto}
-            # Envia para a API do Telegram
-            resposta = requests.post(endereco_envio, json=mensagem)
+                mensagem_texto += f" -> {coluna}: {valor}\n"
+            mensagem_texto += "\n"  # Linha em branco entre registros para ficar mais legível
+        mensagem = {"chat_id": "5240952608", "text": mensagem_texto}
+        # Envia para a API do Telegram somente uma vez
+        resposta = requests.post(endereco_envio, json=mensagem)
         print("Mensagem enviada ao Telegram com sucesso!!")
 
     except Exception as e:
@@ -177,30 +176,25 @@ def cria_excel(df_atual, nome_arquivo):
 # =========================
 def atualizar_google_sheets(nome_planilha, dataframe):
     try:
-        # permissoes que o programa terá
-        scope = ["https://spreadsheets.google.com/feeds", 
+        scope = ["https://spreadsheets.google.com/feeds",
                  "https://www.googleapis.com/auth/drive"]
-        # carrega as credenciais com chave privada, email da conta de servico que atualiza as paginas e ID do projeto
-        credentials = ServiceAccountCredentials.from_json_keyfile_name('servicos_integracao/credentials.json', scope)
+        credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
         client = gspread.authorize(credentials)
 
-        try:
-            sheet = client.open(nome_planilha).sheet1
-        except gspread.exceptions.SpreadsheetNotFound:
-            sheet = client.create(nome_planilha).sheet1
+        spreadsheet = client.create(nome_planilha)
+        spreadsheet.share('efcneumayer@gmail.com', perm_type='user', role='writer')
+        sheet = spreadsheet.sheet1
+        print(f"Planilha '{nome_planilha}' criada e compartilhada com você!")
 
-        # Limpa a aba inteira do sheets antes de atualizar (pra nao sobreescrever os mesmos dados)
         sheet.clear()
-
-        # Converte o dataframe em lista de listas, incluindo o cabeçalho
         dataframe = dataframe.astype(str)
         dados = [dataframe.columns.values.tolist()] + dataframe.values.tolist()
-        # Atualiza os dados no Google Sheets
         sheet.update(range_name='A1', values=dados)
         print(f"Google Sheets '{nome_planilha}' atualizado com sucesso!!")
 
     except Exception as e:
         print(f"Erro ao atualizar Google Sheets: {e}")
+
 
 
 # =========================
@@ -245,7 +239,7 @@ def gerar_relatorio_pdf(nome_arquivo_pdf, dataframe, titulo_relatorio):
 def enviar_email_com_pdf(destinatario, assunto, corpo_email, caminho_pdf):
     try:
         # Dados do seu e-mail (remetente)
-        email_remetente = email_salvo
+        email_remetente = "efcneumayer@gmail.com"
         senha = "aama nnog iooc lawt"  # Atenção! Não é sua senha normal. É uma senha de app.
 
         # Monta o e-mail
