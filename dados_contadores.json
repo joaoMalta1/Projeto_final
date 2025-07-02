@@ -1,0 +1,39 @@
+[
+    {
+      "titulo": "testando",
+      "historico": [],
+      "contagens": [
+        {
+          "nome": "ingresso",
+          "passo": 1,
+          "unidade": "uni",
+          "quantidade": 0
+        },
+        {
+          "nome": "lote",
+          "passo": 10,
+          "unidade": "qtd",
+          "quantidade": 0
+        }
+      ]
+    },
+    {
+      "titulo": "novo",
+      "historico": [1, 2, 2, 1, 1, 2, 2, 2, 1, 1],
+      "contagens": [
+        {
+          "nome": "aaaa",
+          "passo": 3,
+          "unidade": "cm",
+          "quantidade": 5
+        },
+        {
+          "nome": "bbb",
+          "passo": 2,
+          "unidade": "cm",
+          "quantidade": 5
+        }
+      ]
+    }
+  ]
+  
