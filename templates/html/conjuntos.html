@@ -77,17 +77,6 @@ receberArduinoBtn.addEventListener("click", () => {
     fetch(`/envia_arduino/${tituloConjunto}`, {
       method: "POST"
     })
-    .then(response => {
-      if (response.ok) {
-        alert("Dados enviados ao Arduino com sucesso!");
-      } else {
-        alert("Erro ao enviar para o Arduino.");
-      }
-    })
-    .catch(error => {
-      console.error("Erro:", error);
-      alert("Erro ao comunicar com o servidor.");
-    });
   });
     novaContagemBtn.addEventListener("click", () => {
       if (contagemAtual < limite) {

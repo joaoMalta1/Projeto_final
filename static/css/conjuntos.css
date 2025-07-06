@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
 :root {
-  --bg-color: #f5f7fa;
-  --primary-color: #0066cc;
-  --secondary-color: #ffffff;
-  --text-color: #333;
-  --card-shadow: rgba(0, 0, 0, 0.1);
+  --bg-color: #181818; /* Fundo escuro */
+  --primary-color: #1e90ff; /* Azul brilhante */
+  --secondary-color: #2c2c2c; /* Cor de fundo dos cards e modais */
+  --text-color: #eaeaea; /* Texto claro */
+  --card-shadow: rgba(255, 255, 255, 0.1); /* Sombra clara */
   --border-radius: 8px;
   --transition-speed: 0.3s;
 }
@@ -65,13 +65,13 @@ body {
 
 /* Modal */
 #modal {
-  display: none; /* Será ativado via JavaScript */
+  display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.7); /* Escurecendo o fundo */
   z-index: 1000;
   justify-content: center;
   align-items: center;
@@ -94,15 +94,18 @@ body {
   display: block;
   text-align: left;
   margin: 10px 0 5px;
+  color: var(--text-color); /* Ajustando cor do texto */
 }
 
 #modal-content input {
   width: 100%;
   padding: 8px;
-  border: 1px solid #ccc;
+  border: 1px solid #555; /* Bordas mais escuras para input */
   border-radius: var(--border-radius);
   margin-bottom: 10px;
   font-size: 14px;
+  background-color: #444; /* Fundo escuro no input */
+  color: var(--text-color); /* Texto claro no input */
 }
 
 #confirmar, #cancelar {
@@ -121,8 +124,8 @@ body {
 }
 
 #cancelar {
-  background-color: #ccc;
-  color: #333;
+  background-color: #555;
+  color: var(--text-color);
 }
 
 #confirmar:hover {
@@ -130,7 +133,7 @@ body {
 }
 
 #cancelar:hover {
-  background-color: #aaa;
+  background-color: #777; /* Cor de hover mais clara para cancelar */
 }
 
 #opcoes-unidade {
@@ -141,12 +144,35 @@ body {
   display: inline-block;
   margin: 4px;
   padding: 6px 10px;
-  background: #e0e0e0;
+  background: #555; /* Fundo mais escuro */
   border-radius: 5px;
   cursor: pointer;
   font-family: sans-serif;
+  color: var(--text-color);
 }
 
 .opcao-unidade:hover {
-  background: #ccc;
+  background: #777; /* Hover mais claro */
+}
+
+/* Estilos dos botões "Enviar dados" e "Receber dados" */
+#enviar-arduino, #receber-arduino {
+  background-color: var(--primary-color); /* Cor de fundo do botão */
+  color: var(--secondary-color); /* Cor do texto */
+  border: none;
+  padding: 12px 16px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  margin: 10px 10px 20px 0;
+  transition: background-color var(--transition-speed); /* Efeito suave de transição */
+}
+
+#enviar-arduino:hover, #receber-arduino:hover {
+  background-color: #004999; /* Cor de hover mais escura */
+}
+
+#receber-arduino:hover {
+  background-color: #004999; /* Cor mais escura de hover para o 'Receber dados' */
 }

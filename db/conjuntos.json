@@ -1,39 +1,101 @@
 [
   {
-    "titulo": "ingresos",
+    "titulo": "foi",
+    "historico": [
+      3,
+      7,
+      7,
+      2,
+      2,
+      5,
+      5,
+      6,
+      7,
+      7,
+      6,
+      2,
+      1
+    ],
     "contagens": [
       {
-        "nome": "setor a",
-        "passo": 3,
-        "unidade": "unidade",
-        "quantidade": 0,
-        "historico": []
+        "nome": "daniel",
+        "passo": 1,
+        "unidade": "cm",
+        "quantidade": 96
       },
       {
-        "nome": "setor b",
-        "passo": 10,
-        "unidade": "unidade",
-        "quantidade": 0,
-        "historico": []
+        "nome": "bella",
+        "passo": 5,
+        "unidade": "m",
+        "quantidade": 105
+      },
+      {
+        "nome": "jjj",
+        "passo": 3,
+        "unidade": "m",
+        "quantidade": 147
+      },
+      {
+        "nome": "Setor",
+        "passo": 1,
+        "unidade": " ",
+        "quantidade": 0
       }
     ]
   },
   {
-    "titulo": "novo",
+    "titulo": "chek",
+    "historico": [],
     "contagens": [
       {
-        "nome": "teste1",
-        "passo": 3,
-        "unidade": "cm",
-        "quantidade": 10,
-        "historico": []
+        "nome": "jan",
+        "passo": 7,
+        "unidade": "kg",
+        "quantidade": 0
       },
       {
-        "nome": "camisas",
+        "nome": "daniel",
+        "passo": 2,
+        "unidade": "qtd",
+        "quantidade": 0
+      }
+    ]
+  },
+  {
+    "titulo": "setores",
+    "historico": [
+      1,
+      1,
+      1,
+      1,
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      3,
+      3
+    ],
+    "contagens": [
+      {
+        "nome": "Setor A",
         "passo": 1,
-        "unidade": "pacote",
-        "quantidade": 0,
-        "historico": []
+        "unidade": "",
+        "quantidade": 4
+      },
+      {
+        "nome": "Setor B",
+        "passo": 1,
+        "unidade": "",
+        "quantidade": 3
+      },
+      {
+        "nome": "Setor C",
+        "passo": 2,
+        "unidade": "",
+        "quantidade": 12
       }
     ]
   }

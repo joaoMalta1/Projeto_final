@@ -3,11 +3,11 @@
 
 /* Variáveis de tema */
 :root {
-  --bg-color: #f5f7fa;
-  --primary-color: #0066cc;
-  --secondary-color: #ffffff;
-  --text-color: #333;
-  --card-shadow: rgba(0, 0, 0, 0.1);
+  --bg-color: #181818; /* Fundo escuro */
+  --primary-color: #1e90ff; /* Azul brilhante */
+  --secondary-color: #2c2c2c; /* Fundo de elementos */
+  --text-color: #eaeaea; /* Texto claro */
+  --card-shadow: rgba(255, 255, 255, 0.1); /* Sombra suave */
   --border-radius: 8px;
   --transition-speed: 0.3s;
 }
@@ -24,6 +24,7 @@ body {
 h2 {
   text-align: center;
   margin-bottom: 20px;
+  color: var(--text-color);
 }
 
 form#nome_contagem {
@@ -38,9 +39,11 @@ form#nome_contagem {
 form#nome_contagem input[type="text"] {
   padding: 10px;
   font-size: 16px;
-  border: 1px solid #ccc;
+  border: 1px solid #555; /* Bordas mais escuras */
   border-radius: var(--border-radius);
   width: 250px;
+  background-color: #444; /* Fundo mais escuro no input */
+  color: var(--text-color);
 }
 
 form#nome_contagem input[type="submit"] {
@@ -84,13 +87,15 @@ form#nome_contagem input[type="submit"]:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 20px var(--card-shadow);
 }
+
+/* Modal */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.7); /* Fundo mais escuro */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -98,14 +103,21 @@ form#nome_contagem input[type="submit"]:hover {
 }
 
 .modal-conteudo {
-  background: white;
+  background: var(--secondary-color);
   padding: 20px;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   min-width: 300px;
+  color: var(--text-color);
 }
 
 .fechar {
   float: right;
   font-size: 20px;
+  color: var(--text-color);
   cursor: pointer;
+  transition: color var(--transition-speed);
+}
+
+.fechar:hover {
+  color: #ff6666; /* Cor de hover para o ícone de fechar */
 }
