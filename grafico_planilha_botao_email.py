@@ -28,6 +28,7 @@ with open('dados_contadores.json', 'r', encoding='utf-8') as file:
 def processar_registro(registro):
     contadores = [c["nome"] for c in registro["contagens"]]
     valores = [c["quantidade"] for c in registro["contagens"]]
+    passos = [c["passo"] for c in registro["contagens"]]
     historico = registro["historico"]
 
     evolucao = [[] for _ in contadores]
@@ -36,9 +37,9 @@ def processar_registro(registro):
     for evento in historico:
         for i in range(len(contadores)):
             if evento == i + 1:
-                acumulado[i] += 1  # Incremento
+                acumulado[i] += 1*passos[i]  # Incremento
             elif evento == -(i + 1):
-                acumulado[i] -= 1  # Decremento
+                acumulado[i] -= 1*passos[i]  # Decremento
             evolucao[i].append(acumulado[i])  # <<< Agora dentro do loop!
 
 
@@ -126,6 +127,29 @@ def salvar_email():
             enviar_email_com_pdf(email_salvo, assunto, corpo, nome_pdf)
     except Exception as e:
         print("Erro ao tentar enviar o(s) e-mail(s):", e)
+
+#Função que salva o ultimo email usado em um arquivo
+
+ARQUIVO_EMAIL = "ultimo_email.txt"
+
+def salva_ultimo_email(email):
+    with open(ARQUIVO_EMAIL, "w") as f:
+        f.write(email)
+#Função que carrega o ultimo email
+def carregar_ultimo_email():
+    if os.path.exists(ARQUIVO_EMAIL):
+        with open(ARQUIVO_EMAIL, "r") as f:
+            return f.read().strip()
+    return ""
+
+# Função que verifica se o email é valido e envia ele, caso for
+def enviar_email():
+    email = entrada.get()
+    if email:
+        print(f"Enviando e-mail para: {email}")
+        salva_ultimo_email(email)
+    else:
+        print("Digite um e-mail válido.")
 #===============================
 # funcoes do eduardo
 #===============================
@@ -135,24 +159,56 @@ def salvar_email():
 # =========================
 def enviar_mensagem_telegram(dataframe, conjunto_contagem):
     try:
-        # Endereço da API do Telegram
-        endereco_base = f"https://api.telegram.org/bot7929499599:AAFau1XWBd8hxDAQ2xlwGing-S4bpAjAD-8"
+        import requests
+
+        endereco_base = "https://api.telegram.org/bot8141606427:AAHgYPpVbfJJuungH6koswgqBHFSnA97q7w"
         endereco_envio = endereco_base + "/sendMessage"
 
-        # Percorre as linhas do dataframe e monta mensagem para cada linha
-        for _, row in dataframe.iterrows():
-            mensagem_texto = f"Atualização de {conjunto_contagem.capitalize()}:\n"
-            for coluna, valor in row.items():
-                mensagem_texto += f" ->{coluna}: {valor}\n"
+        # Colunas que você quer mostrar (na ordem correta)
+        colunas = ["nome", "passo", "unidade", "quantidade"]
 
-            # Monta o corpo da mensagem para enviar no Telegram
-            mensagem = {"chat_id": "5240952608", "text": mensagem_texto}
-            # Envia para a API do Telegram
-            resposta = requests.post(endereco_envio, json=mensagem)
+        # Calcula a largura de cada coluna com base no maior valor
+        larguras = {}
+        for col in colunas:
+            max_valor = max([len(str(v)) for v in dataframe[col]] + [len(col)])
+            larguras[col] = max_valor + 2  # margem extra
+
+        # Início da mensagem
+        mensagem_texto = f"<b>Atualização de {conjunto_contagem.capitalize()}</b>\n<pre>"
+
+        # Cabeçalho
+        cabecalho = ""
+        for col in colunas:
+            cabecalho += str(col.capitalize()).ljust(larguras[col]) + "|"
+        mensagem_texto += cabecalho.rstrip("|") + "\n"
+
+        # Separador
+        mensagem_texto += "-" * len(cabecalho) + "\n"
+
+        # Linhas da tabela
+        for _, row in dataframe.iterrows():
+            linha = ""
+            for col in colunas:
+                valor = str(row[col])
+                linha += valor.ljust(larguras[col]) + "|"
+            mensagem_texto += linha.rstrip("|") + "\n"
+
+        mensagem_texto += "</pre>"
+        print(mensagem_texto)
+
+        # Envia para o Telegram
+        mensagem = {
+            "chat_id": "7616089098",
+            "text": mensagem_texto,
+            "parse_mode": "HTML"
+        }
+
+        resposta = requests.post(endereco_envio, json=mensagem)
         print("Mensagem enviada ao Telegram com sucesso!!")
 
     except Exception as e:
         print(f"Erro no envio de mensagem Telegram: {e}")
+
 
 
 #==========================
@@ -348,7 +404,7 @@ def monitorar_json():
         except Exception as e:
             print(f"Erro ao verificar JSON: {e}")
 
-        time.sleep(1)  # espera 1 segundo para não sobrecarregar
+        time.sleep(5)  # espera 5 segundo para não sobrecarregar
 
 
 
@@ -356,15 +412,32 @@ def monitorar_json():
 combo_conjuntos.bind("<<ComboboxSelected>>", lambda e: atualizar_grafico())
 combo_grafico.bind("<<ComboboxSelected>>", lambda e: atualizar_grafico())
 
+# Cria label para a entrada do email
+label_email = tk.Label(root, text="Digite seu e-mail aqui:")
+label_email.pack(pady=(15, 0))
+
 threading.Thread(target=monitorar_json, daemon=True).start()
 entrada = tk.Entry(root, width=30)
 entrada.pack(pady=10)
 
+
+# Inserir último e-mail 
+ultimo_email = carregar_ultimo_email()
+if ultimo_email:
+    entrada.insert(0, ultimo_email)
+    entrada.config(fg="black")
+
+
+
+
+
 # Botão para salvar o texto
-botao_email = tk.Button(root, text="Salvar email", command=salvar_email)
+botao_email = tk.Button(root, text="Enviar", command=enviar_email)
 botao_email.pack(pady=10)
+
+
+
+
 
 atualizar_grafico()
 root.mainloop()
-
-
