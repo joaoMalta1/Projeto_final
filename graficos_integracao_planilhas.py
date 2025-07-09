@@ -237,13 +237,13 @@ def atualizar_google_sheets(nome_planilha, dataframe):
         scope = ["https://spreadsheets.google.com/feeds", 
                  "https://www.googleapis.com/auth/drive"]
         # carrega as credenciais com chave privada, email da conta de servico que atualiza as paginas e ID do projeto
-        credentials = ServiceAccountCredentials.from_json_keyfile_name('servicos_integracao/credentials.json', scope)
+        credentials = ServiceAccountCredentials.from_json_keyfile_name('Credentials.json', scope)
         client = gspread.authorize(credentials)
 
         try:
-            sheet = client.open(nome_planilha).sheet1
+            sheet = client.open_by_key("1lnHGk6e7HftHsJL1Sd5SMdm4vig9xIlBBKbi-_s95LU").sheet1
         except gspread.exceptions.SpreadsheetNotFound:
-            sheet = client.create(nome_planilha).sheet1
+            print("❌ Planilha não encontrada. Crie no Google Sheets e compartilhe com a conta de serviço.")
 
         # Limpa a aba inteira do sheets antes de atualizar (pra nao sobreescrever os mesmos dados)
         sheet.clear()
