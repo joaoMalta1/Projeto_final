@@ -228,6 +228,7 @@ void mostrarSegundaColuna() {
       escolheCor(i);
       tela.setTextSize(3);
       tela.print(String(contagem[i].qtd) + contagem[i].unidade);
+
     }
   }
 }
@@ -249,9 +250,9 @@ void atualizaTela(int i) {
   tela.setCursor(150 + space[i], y + i * 6);
 
   escolheCor(i);
-  tela.print(String(contagem[i].qtd) + contagem[i].unidade);
-
   tela.setTextSize(3);
+  tela.print(String(contagem[i].qtd) + contagem[i].unidade);
+  
 }
 
 void atualizaTelaSerial() {
@@ -426,7 +427,6 @@ void esperarDadosSerial() {
     salvarDadosNaEEPROM();
   }
 }
-
 
 
 
