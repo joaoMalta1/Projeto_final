@@ -35,10 +35,15 @@ O código Arduino (`.ino`) é o software embarcado no microcontrolador que geren
     * **Recebe Configurações**: Aguarda comandos da interface web via serial para configurar os contadores (título, nomes, passos, unidades, quantidades iniciais).
     * **Envia Dados**: Ao receber um comando "enviar", formata e envia os dados atuais dos contadores e todo o histórico de eventos de botões para a interface web. O histórico é resetado na EEPROM após o envio para evitar duplicação.
 
+
 **Estrutura de Dados:**
 
 * `struct contagem`: Define cada contador com `nome`, `unidade`, `passo` (valor de incremento/decremento) e `qtd` (quantidade atual).
 * `botao_press[]`: Armazena o histórico de cada ação de botão (incremento/decremento para cada contador).
+
+**Prototipo simulado:**
+
+![micro_fritz](https://github.com/user-attachments/assets/a7eccf16-9b0b-4d59-ac9f-b325dde11707)
 
 ---
 
