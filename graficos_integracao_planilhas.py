@@ -116,18 +116,28 @@ def atualizar_grafico():
 # =========== Função para salvar o email ===============
 
 def salvar_email():
-    global email_salvo, dataframes
+    global email_salvo
     email_salvo = entrada.get()
-    print("email:", email_salvo)
+    print("Email:", email_salvo)
+
     try:
-        for titulo in dataframes:
-            nome_pdf = f"{titulo}_relatorio.pdf"
-            assunto = f"Relatório de Contagem - {titulo}"
-            corpo = f"Segue em anexo o relatório atualizado para o conjunto: {titulo}"
-            enviar_email_com_pdf(email_salvo, assunto, corpo, nome_pdf)
-            salva_ultimo_email(email_salvo)
+        # Obtém o nome do conjunto selecionado na Combobox
+        conjunto_escolhido = combo_conjuntos.get()
+
+        if not conjunto_escolhido:
+            print("❌ Nenhum conjunto selecionado.")
+            return
+
+        nome_pdf = f"{conjunto_escolhido}_relatorio.pdf"
+        assunto = f"Relatório de Contagem - {conjunto_escolhido}"
+        corpo = f"Segue em anexo o relatório atualizado para o conjunto: {conjunto_escolhido}"
+
+        enviar_email_com_pdf(email_salvo, assunto, corpo, nome_pdf)
+        salva_ultimo_email(email_salvo)
+
     except Exception as e:
-        print("Erro ao tentar enviar o(s) e-mail(s):", e)
+        print("Erro ao tentar enviar o e-mail:", e)
+
 
 #Função que salva o ultimo email usado em um arquivo
 
@@ -210,6 +220,22 @@ def enviar_mensagem_telegram(dataframe, conjunto_contagem):
     except Exception as e:
         print(f"Erro no envio de mensagem Telegram: {e}")
 
+def enviar_mensagem_do_conjunto_telegram():
+    try:
+        conjunto_escolhido = combo_conjuntos.get()
+        if not conjunto_escolhido:
+            print("❌ Nenhum conjunto selecionado.")
+            return
+
+        df = dataframes.get(conjunto_escolhido)
+        if df is None:
+            print(f"❌ Conjunto '{conjunto_escolhido}' não encontrado nos dataframes.")
+            return
+
+        enviar_mensagem_telegram(df, conjunto_escolhido)
+
+    except Exception as e:
+        print(f"Erro ao tentar enviar mensagem do Telegram: {e}")
 
 
 #==========================
@@ -242,9 +268,9 @@ def atualizar_google_sheets(nome_planilha, dataframe):
         client = gspread.authorize(credentials)
 
         try:
-            sheet = client.open_by_key("1lnHGk6e7HftHsJL1Sd5SMdm4vig9xIlBBKbi-_s95LU").sheet1
+            sheet = client.open(nome_planilha).sheet1
         except gspread.exceptions.SpreadsheetNotFound:
-            print("❌ Planilha não encontrada. Crie no Google Sheets e compartilhe com a conta de serviço.")
+            sheet = client.create(nome_planilha).sheet1
 
         # Limpa a aba inteira do sheets antes de atualizar (pra nao sobreescrever os mesmos dados)
         sheet.clear()
@@ -258,6 +284,7 @@ def atualizar_google_sheets(nome_planilha, dataframe):
 
     except Exception as e:
         print(f"Erro ao atualizar Google Sheets: {e}")
+
 
 
 # =========================
@@ -392,14 +419,13 @@ def monitorar_json():
                     # 2. Atualiza Google Sheets
                     atualizar_google_sheets(titulo, df_final)
 
-                    # 3. Envia mensagem no Telegram
-                    enviar_mensagem_telegram(df, titulo)
-
-                    # 4. Gera PDF do relatório
+                    # 3. Gera PDF do relatório
                     nome_pdf = f"{titulo}_relatorio.pdf"
                     gerar_relatorio_pdf(nome_pdf, df_final, f"Relatório de Contagem - {titulo}")
 
                     print(f"Pronto para enviar e-mail com relatório '{nome_pdf}' quando o botão for clicado.")
+                # Envia a mensagem para o telegram
+                enviar_mensagem_do_conjunto_telegram()
 
 
         except Exception as e:
