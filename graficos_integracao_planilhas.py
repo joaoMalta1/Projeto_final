@@ -21,7 +21,7 @@ import mimetypes
 
 
 # ==== Carregar o JSON ====
-with open('dados_contadores.json', 'r', encoding='utf-8') as file:
+with open('db/conjuntos.json', 'r', encoding='utf-8') as file:
     dados = json.load(file)
 
 # ==== Função que monta os dados a partir do registro escolhido ====
@@ -125,6 +125,7 @@ def salvar_email():
             assunto = f"Relatório de Contagem - {titulo}"
             corpo = f"Segue em anexo o relatório atualizado para o conjunto: {titulo}"
             enviar_email_com_pdf(email_salvo, assunto, corpo, nome_pdf)
+            salva_ultimo_email(email_salvo)
     except Exception as e:
         print("Erro ao tentar enviar o(s) e-mail(s):", e)
 
@@ -147,7 +148,7 @@ def enviar_email():
     email = entrada.get()
     if email:
         print(f"Enviando e-mail para: {email}")
-        salva_ultimo_email(email)
+        salvar_email()
     else:
         print("Digite um e-mail válido.")
 #===============================
@@ -301,7 +302,7 @@ def gerar_relatorio_pdf(nome_arquivo_pdf, dataframe, titulo_relatorio):
 def enviar_email_com_pdf(destinatario, assunto, corpo_email, caminho_pdf):
     try:
         # Dados do seu e-mail (remetente)
-        email_remetente = email_salvo
+        email_remetente = "efcneumayer@gmail.com"
         senha = "aama nnog iooc lawt"  # Atenção! Não é sua senha normal. É uma senha de app.
 
         # Monta o e-mail
@@ -337,7 +338,7 @@ def enviar_email_com_pdf(destinatario, assunto, corpo_email, caminho_pdf):
 # WHILE INTEGRADO COM OS DOIS PROGRAMAS
 #=============================
 
-caminho_json = "dados_contadores.json"
+caminho_json = "db/conjuntos.json"
 ultima_modificacao = None
 
 def monitorar_json():
