@@ -18,6 +18,7 @@ from fpdf import FPDF
 import smtplib
 from email.message import EmailMessage
 import mimetypes
+from datetime import datetime
 
 
 # ==== Carregar o JSON ====
@@ -289,43 +290,44 @@ def atualizar_google_sheets(nome_planilha, dataframe):
 
 def atualizar_google_sheets_abas(planilha_id, dataframes):
     try:
-        # Permissões e autenticação
         scope = ["https://spreadsheets.google.com/feeds",
                  "https://www.googleapis.com/auth/drive"]
         credentials = ServiceAccountCredentials.from_json_keyfile_name('Credentials.json', scope)
         client = gspread.authorize(credentials)
 
-        # Abre a planilha principal pelo ID
         spreadsheet = client.open_by_key(planilha_id)
 
         for titulo, df in dataframes.items():
             print(f"🔁 Atualizando aba '{titulo}'...")
 
-            # Remove duplicatas pela primeira coluna, mantendo a última
-            df = df.drop_duplicates(subset=df.columns[0], keep='last')
             df = df.fillna("").astype(str)
+            df['Atualizado em'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             try:
-                # Tenta acessar a aba existente
                 worksheet = spreadsheet.worksheet(titulo)
+                dados_existentes = worksheet.get_all_values()
+                if not dados_existentes:
+                    # Se a aba existe mas está vazia
+                    worksheet.update("A1", [df.columns.tolist()] + df.values.tolist())
+                else:
+                    # Verifica se os cabeçalhos batem
+                    cabecalho_existente = dados_existentes[0]
+                    colunas_df = df.columns.tolist()
+                    
+                    if cabecalho_existente != colunas_df:
+                        print(f"⚠️ Cabeçalhos diferentes na aba '{titulo}'. Abortando atualização.")
+                        continue
+                    
+                    worksheet.append_rows(df.values.tolist())
+
             except gspread.exceptions.WorksheetNotFound:
-                # Se não existir, cria a aba com até 100 linhas e 20 colunas
+                # Cria nova aba com os dados completos
                 worksheet = spreadsheet.add_worksheet(title=titulo, rows="100", cols="20")
-
-            # Limpa os dados da aba
-            worksheet.clear()
-
-            # Converte para lista de listas com cabeçalho
-            dados = [df.columns.tolist()] + df.values.tolist()
-
-            # Atualiza na aba
-            worksheet.update("A1", dados)
+                worksheet.update("A1", [df.columns.tolist()] + df.values.tolist())
 
         print("✅ Todas as abas atualizadas com sucesso.")
-
     except Exception as e:
         print(f"❌ Erro ao atualizar abas no Google Sheets: {e}")
-
 
 
 # =========================
@@ -333,40 +335,47 @@ def atualizar_google_sheets_abas(planilha_id, dataframes):
 # =========================
 def gerar_relatorio_pdf(nome_arquivo_pdf, dataframe, titulo_relatorio):
     try:
-        primeira_coluna = dataframe.columns[0]
-        dataframe = dataframe.drop_duplicates(subset=primeira_coluna, keep='last')
         dataframe = dataframe.fillna("").astype(str)
+        dataframe['Atualizado em'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        # Cria o PDF
+        colunas = dataframe.columns.tolist()
+
+        if os.path.exists(nome_arquivo_pdf):
+            with open(nome_arquivo_pdf.replace(".pdf", ".csv"), "a", encoding="utf-8") as f:
+                for _, row in dataframe.iterrows():
+                    f.write(";".join(row.astype(str)) + "\n")
+        else:
+            with open(nome_arquivo_pdf.replace(".pdf", ".csv"), "w", encoding="utf-8") as f:
+                f.write(";".join(colunas) + "\n")
+                for _, row in dataframe.iterrows():
+                    f.write(";".join(row.astype(str)) + "\n")
+
+        df_completo = pd.read_csv(nome_arquivo_pdf.replace(".pdf", ".csv"), sep=";")
+
         pdf = FPDF()
-        pdf.set_auto_page_break(auto=True, margin=15)   # ativa a quebra automatica de linha
+        pdf.set_auto_page_break(auto=True, margin=15)
         pdf.add_page()
 
-        # Título do relatório
-        pdf.set_font("Arial", 'B', 16)      # parametros de fonte, estilo e tamanho
-        pdf.cell(0, 10, titulo_relatorio, ln=True, align="C")   # parametros de largura, altura e texto
+        pdf.set_font("Arial", 'B', 16)
+        pdf.cell(0, 10, titulo_relatorio, ln=True, align="C")
         pdf.ln(10)
 
-        # Cabeçalho da tabela
         pdf.set_font("Arial", 'B', 12)
-        for col in dataframe.columns:
+        for col in df_completo.columns:
             pdf.cell(50, 10, str(col), border=1)
         pdf.ln()
 
-        # Dados da tabela
         pdf.set_font("Arial", '', 12)
-        for _, row in dataframe.iterrows():
+        for _, row in df_completo.iterrows():
             for item in row:
                 pdf.cell(50, 10, str(item), border=1)
             pdf.ln()
 
-        # Salva o PDF
         pdf.output(nome_arquivo_pdf)
         print(f"Relatório '{nome_arquivo_pdf}' gerado com sucesso")
 
     except Exception as e:
         print(f"Erro ao gerar relatório PDF: {e}")
-
 
 # =========================
 # Função manda email com PDF gerado
