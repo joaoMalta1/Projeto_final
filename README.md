@@ -109,7 +109,7 @@ Este aplicativo de desktop oferece ferramentas avançadas de visualização de d
     * Ative o ambiente:
         * Windows: `venv\Scripts\activate`
         * macOS/Linux: `source venv/bin/activate`
-    * Instale as dependências: `pip install Flask matplotlib pandas gspread oauth2client fpdf requests` (Note: `tkinter` e `smtplib` são geralmente parte da instalação padrão do Python).
+    * Instale as dependências: `pip install -r requirements.txt `
 3.  **Configurar Credenciais (Google Sheets e Telegram)**:
     * Crie um arquivo `Credentials.json` na raiz do projeto para o Google Sheets.
     * Configure o token do seu bot Telegram e o `chat_id` dentro do arquivo `graficos_integracao_planilhas.py`.
