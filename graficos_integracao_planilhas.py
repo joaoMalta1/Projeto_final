@@ -98,8 +98,7 @@ def atualizar_grafico():
         ax.grid(True)
 
     elif modo == "Pizza":
-        ax.pie(valores, labels=[f"{contadores[i]}: {valores[i]}" for i in range(len(contadores))],
-               autopct='%1.1f%%')
+        ax.pie(valores, labels=[f"{contadores[i]}: {valores[i]}" for i in range(len(contadores))], autopct='%1.1f%%')
         ax.set_title(f"Distribuição - {titulo} (Pizza)")
 
     # Limpar gráfico anterior
@@ -254,36 +253,78 @@ def cria_excel(df_atual, nome_arquivo):
 
     return df_final
 
-
+'''
 # =========================
 # Função para atualizar Google Sheets
 # =========================
 def atualizar_google_sheets(nome_planilha, dataframe):
     try:
-        # permissoes que o programa terá
-        scope = ["https://spreadsheets.google.com/feeds", 
+        scope = ["https://spreadsheets.google.com/feeds",
                  "https://www.googleapis.com/auth/drive"]
-        # carrega as credenciais com chave privada, email da conta de servico que atualiza as paginas e ID do projeto
         credentials = ServiceAccountCredentials.from_json_keyfile_name('Credentials.json', scope)
         client = gspread.authorize(credentials)
 
         try:
-            sheet = client.open(nome_planilha).sheet1
+            sheet = client.open_by_key("1lnHGk6e7HftHsJL1Sd5SMdm4vig9xIlBBKbi-_s95LU").sheet1
         except gspread.exceptions.SpreadsheetNotFound:
-            sheet = client.create(nome_planilha).sheet1
+            print("❌ Planilha não encontrada. Compartilhou com a conta de serviço?")
+            return
 
-        # Limpa a aba inteira do sheets antes de atualizar (pra nao sobreescrever os mesmos dados)
         sheet.clear()
 
-        # Converte o dataframe em lista de listas, incluindo o cabeçalho
+        # 🔁 Remove duplicatas pela primeira coluna (mantém a última)
+        dataframe = dataframe.drop_duplicates(subset=dataframe.columns[0], keep='last')
+
+        # Converte o DataFrame em lista de listas com cabeçalho
         dataframe = dataframe.astype(str)
         dados = [dataframe.columns.values.tolist()] + dataframe.values.tolist()
-        # Atualiza os dados no Google Sheets
+
         sheet.update(range_name='A1', values=dados)
-        print(f"Google Sheets '{nome_planilha}' atualizado com sucesso!!")
+        print(f"✅ Google Sheets '{nome_planilha}' atualizado com sucesso!")
 
     except Exception as e:
-        print(f"Erro ao atualizar Google Sheets: {e}")
+        print(f"❌ Erro ao atualizar Google Sheets: {e}")
+
+'''
+
+def atualizar_google_sheets_abas(planilha_id, dataframes):
+    try:
+        # Permissões e autenticação
+        scope = ["https://spreadsheets.google.com/feeds",
+                 "https://www.googleapis.com/auth/drive"]
+        credentials = ServiceAccountCredentials.from_json_keyfile_name('Credentials.json', scope)
+        client = gspread.authorize(credentials)
+
+        # Abre a planilha principal pelo ID
+        spreadsheet = client.open_by_key(planilha_id)
+
+        for titulo, df in dataframes.items():
+            print(f"🔁 Atualizando aba '{titulo}'...")
+
+            # Remove duplicatas pela primeira coluna, mantendo a última
+            df = df.drop_duplicates(subset=df.columns[0], keep='last')
+            df = df.fillna("").astype(str)
+
+            try:
+                # Tenta acessar a aba existente
+                worksheet = spreadsheet.worksheet(titulo)
+            except gspread.exceptions.WorksheetNotFound:
+                # Se não existir, cria a aba com até 100 linhas e 20 colunas
+                worksheet = spreadsheet.add_worksheet(title=titulo, rows="100", cols="20")
+
+            # Limpa os dados da aba
+            worksheet.clear()
+
+            # Converte para lista de listas com cabeçalho
+            dados = [df.columns.tolist()] + df.values.tolist()
+
+            # Atualiza na aba
+            worksheet.update("A1", dados)
+
+        print("✅ Todas as abas atualizadas com sucesso.")
+
+    except Exception as e:
+        print(f"❌ Erro ao atualizar abas no Google Sheets: {e}")
 
 
 
@@ -292,6 +333,10 @@ def atualizar_google_sheets(nome_planilha, dataframe):
 # =========================
 def gerar_relatorio_pdf(nome_arquivo_pdf, dataframe, titulo_relatorio):
     try:
+        primeira_coluna = dataframe.columns[0]
+        dataframe = dataframe.drop_duplicates(subset=primeira_coluna, keep='last')
+        dataframe = dataframe.fillna("").astype(str)
+
         # Cria o PDF
         pdf = FPDF()
         pdf.set_auto_page_break(auto=True, margin=15)   # ativa a quebra automatica de linha
@@ -397,18 +442,17 @@ def monitorar_json():
                 #DADOS DO EDUARDO A PARTIR DAQUI
                 #=====================================
 
-                # Dicionário para armazenar os DataFrames por título
+                # Prepara os DataFrames
                 dataframes = {}
-                # Para cada conjunto de contagem
                 for conjunto in dados:
                     titulo = conjunto["titulo"]
                     contagens = conjunto["contagens"]
-
-                    # Cria DataFrame a partir da lista de contagens
                     df = pd.DataFrame(contagens)
-                    # Adiciona ao dicionário com o título como chave
                     dataframes[titulo] = df
 
+                # 1. Atualiza Google Sheets com abas separadas
+                planilha_id = "1lnHGk6e7HftHsJL1Sd5SMdm4vig9xIlBBKbi-_s95LU"
+                atualizar_google_sheets_abas(planilha_id, dataframes)
 
                 for titulo, df in dataframes.items():
                     print(f"Atualizando dados para: {titulo}")
@@ -417,7 +461,7 @@ def monitorar_json():
                     df_final = cria_excel(df, nome_excel)
 
                     # 2. Atualiza Google Sheets
-                    atualizar_google_sheets(titulo, df_final)
+                    #atualizar_google_sheets(titulo, df_final)
 
                     # 3. Gera PDF do relatório
                     nome_pdf = f"{titulo}_relatorio.pdf"
