@@ -322,8 +322,15 @@ def atualizar_google_sheets_abas(planilha_id, dataframes):
 
             except gspread.exceptions.WorksheetNotFound:
                 # Cria nova aba com os dados completos
-                worksheet = spreadsheet.add_worksheet(title=titulo, rows="100", cols="20")
-                worksheet.update("A1", [df.columns.tolist()] + df.values.tolist())
+                from re import sub
+                titulo_sanitizado = sub(r'[^\w\s\-]', '', titulo)[:100]  # tira símbolos especiais e limita a 100 chars
+                try:
+                    worksheet = spreadsheet.add_worksheet(title=titulo_sanitizado, rows="100", cols="20")
+                    dados = [df.columns.tolist()] + df.values.tolist()
+                    worksheet.update("A1", dados)
+                    print(f"✅ Nova aba '{titulo_sanitizado}' criada com sucesso.")
+                except Exception as e:
+                    print(f"❌ Erro ao criar aba '{titulo_sanitizado}': {e}")
 
         print("✅ Todas as abas atualizadas com sucesso.")
     except Exception as e:
