@@ -6,7 +6,7 @@ import time
 
 app = Flask(__name__)
 conjuntos_teste = []
-porta = "COM26"
+porta = "COM30"
 
 @app.route("/")
 def home():

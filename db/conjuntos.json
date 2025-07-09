@@ -2,44 +2,54 @@
   {
     "titulo": "foi",
     "historico": [
+      4,
+      4,
+      4,
+      4,
+      4,
       3,
-      7,
-      7,
+      3,
+      3,
+      3,
+      3,
+      1,
+      1,
+      1,
+      1,
       2,
       2,
-      5,
-      5,
-      6,
-      7,
-      7,
-      6,
       2,
-      1
+      2,
+      2,
+      4,
+      4,
+      4,
+      4
     ],
     "contagens": [
       {
         "nome": "daniel",
         "passo": 1,
         "unidade": "cm",
-        "quantidade": 96
+        "quantidade": 100
       },
       {
         "nome": "bella",
         "passo": 5,
         "unidade": "m",
-        "quantidade": 105
+        "quantidade": 130
       },
       {
         "nome": "jjj",
         "passo": 3,
         "unidade": "m",
-        "quantidade": 147
+        "quantidade": 162
       },
       {
         "nome": "Setor",
         "passo": 1,
-        "unidade": " ",
-        "quantidade": 0
+        "unidade": "",
+        "quantidade": 9
       }
     ]
   },
